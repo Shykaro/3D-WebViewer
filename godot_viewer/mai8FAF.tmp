@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://gynpel7qpjrr"]
+[gd_scene load_steps=8 format=3 uid="uid://gynpel7qpjrr"]
 
 [ext_resource type="Script" path="res://turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://camera_rig.gd" id="3_p5mvp"]
@@ -6,10 +6,15 @@
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
 
 [sub_resource type="Environment" id="Environment_hg047"]
-background_mode = 1
-background_color = Color(0.724643, 0.724643, 0.724643, 1)
+background_color = Color(0, 1, 1, 1)
 ambient_light_source = 1
 reflected_light_source = 1
+
+[sub_resource type="Environment" id="Environment_we38t"]
+background_mode = 1
+background_color = Color(0.778646, 0.842618, 0.842501, 1)
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_5i6jm"]
 
 [node name="main" type="Node3D"]
 
@@ -42,6 +47,11 @@ transform = Transform3D(0.646883, 0.39527, -0.652153, 0, 0.855183, 0.518326, 0.7
 light_energy = 0.4
 shadow_bias = 2.0
 sky_mode = 1
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+process_priority = 1
+environment = SubResource("Environment_we38t")
+camera_attributes = SubResource("CameraAttributesPractical_5i6jm")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
