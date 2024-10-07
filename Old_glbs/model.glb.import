@@ -31,27 +31,6 @@ animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
-_subresources={
-"nodes": {
-"PATH:Scene Collection/Cube": {
-"generate/physics": true
-},
-"PATH:Scene Collection/Cube_001": {
-"generate/physics": true
-},
-"PATH:Scene Collection/Cube_002": {
-"generate/physics": true
-},
-"PATH:Scene Collection/Icosphere": {
-"generate/physics": true
-},
-"PATH:Scene Collection/Icosphere_001": {
-"generate/physics": true
-},
-"PATH:Scene Collection/Icosphere_002": {
-"generate/physics": true
-}
-}
-}
+_subresources={}
 gltf/naming_version=0
 gltf/embedded_image_handling=1

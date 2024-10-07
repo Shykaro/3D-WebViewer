@@ -14,6 +14,7 @@ reflected_light_source = 1
 
 [node name="main" type="Node3D"]
 script = ExtResource("1_it4ho")
+selection_distance = null
 
 [node name="turntable" type="Node3D" parent="."]
 script = ExtResource("1_0wb5i")
