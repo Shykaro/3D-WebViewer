@@ -24,7 +24,6 @@ script = ExtResource("1_0wb5i")
 
 [node name="camera_rig" type="Node3D" parent="."]
 script = ExtResource("3_p5mvp")
-camera_distance = 3
 
 [node name="camera_arm" type="Node3D" parent="camera_rig"]
 transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0)

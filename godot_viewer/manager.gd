@@ -16,7 +16,6 @@ func _input(event):
 		# Überprüfen, ob der letzte Klick innerhalb der Doppelklick-Zeitspanne liegt
 		if current_time - last_click_time <= double_click_time:
 			_select_model_part()
-			#print("double clicked")
 		last_click_time = current_time
 
 # Funktion zur Auswahl des Modellteils bei Doppelklick
@@ -34,35 +33,26 @@ func _select_model_part():
 
 	# Überprüfe, ob der Raycast ein Objekt trifft
 	if result and result.collider:
-		#print("Raycast getroffen: ", result.collider.name)
-
-		# Finde den übergeordneten MeshInstance3D
 		var current_node = result.collider
 		while current_node:
-			#print("Übergeordneter Node: ", current_node.name)
-			
 			# Falls wir den MeshNode (z.B. Cube) finden, verarbeiten wir diesen
 			if current_node is MeshInstance3D:
 				# Falls `selected_part` noch nicht gesetzt ist (erste Auswahl)
 				if not selected_part:
 					selected_part = current_node
-					#print("Erstes ausgewähltes Teil: ", selected_part.name)
 					_enter_sub_mode(selected_part)
 				# Überprüfe, ob das getroffene Objekt ein direkter Nachkomme des aktuellen `selected_part` ist
 				elif _is_direct_child(selected_part, current_node):
-					#print("Direktes Child getroffen: ", current_node.name)
 					selected_part = current_node  # Setze das getroffene Child als neues `selected_part`
 					_enter_sub_mode(selected_part)  # Fokussiere auf dieses Teil
 				else:
 					# Ein nicht verwandtes Objekt getroffen: Zum Parent wechseln
-					#print("Anderes Objekt getroffen, zurück zum Parent")
 					_select_parent()
-				return  # Keine weiteren Schritte nötig, Abbruch
+				return  # Abbruch nach dem Setzen der Auswahl
 
 			current_node = current_node.get_parent()
 
 	# Falls nichts getroffen wurde, ebenfalls zum Parent wechseln
-	#print("Nichts getroffen, zurück zum Parent.")
 	_select_parent()
 
 # Funktion zum Wechsel in den Parent-Node
@@ -70,24 +60,26 @@ func _select_parent():
 	# Wenn `selected_part` existiert und einen Parent hat, wechseln wir dorthin
 	if selected_part and selected_part.get_parent() is MeshInstance3D:
 		selected_part = selected_part.get_parent()
-		#print("Wechsel in die Parent-Ebene: ", selected_part.name)
 		_enter_sub_mode(selected_part)
 	else:
-		# Höchste Ebene erreicht: Sichtbarkeit aller Teile wiederherstellen
-		#print("Höchste Ebene erreicht, alle Teile zurücksetzen.")
+		# Höchste Ebene erreicht: Sichtbarkeit aller Teile wiederherstellen und Zoom zurücksetzen
+		$turntable.reset_focus()
 		selected_part = null  # Setze `selected_part` zurück
 		reset_model_visibility()
+		_reset_camera_zoom()
 
 # Funktion zum Wechsel in den Sub-Modus
 func _enter_sub_mode(part: Node):
-	#print("Sub-Modus betreten mit Teil: ", part.name)
-	
-	# Wenn das `part` das Root-Modell ist, setze den Turntable zurück
-	if part == model_container:
-		$turntable.reset_focus()
-	else:
-		# Fokussiere den Turntable auf das neu ausgewählte Teil
-		$turntable.set_focus_on_object(part)
+	$turntable.set_focus_on_object(part)
+
+	# Verwende die neue AABB-Funktion für das Child-Objekt
+	var current_model_max_size = $turntable.calculate_max_width_from_vertices(part)
+	if current_model_max_size > 0.0:
+		# Setze den Mindestzoom und den Startzoom auf Basis der neuen Breite
+		$camera_rig.min_zoom = current_model_max_size * 1.05  # Minimaler Zoom 5% über der größten Modellachse
+		$camera_rig.camera_distance = max(current_model_max_size * 1.05, $camera_rig.camera_distance) # Camera distance beibehalten oder minimum nehmen
+		$camera_rig.max_zoom = $camera_rig.min_zoom * 5  # Maximaler Zoom ist ein Vielfaches davon
+		$camera_rig._handle_zoom()  # Update den Zoom
 
 	# Durchlaufe alle Haupt-Nodes und passe die Materialien an
 	for child in model_container.get_child(0).get_child(0).get_children():
@@ -96,10 +88,16 @@ func _enter_sub_mode(part: Node):
 				# Mache alle anderen Objekte transparent
 				make_part_transparent(child)
 			else:
-				print("Aktuell ausgewähltes Teil: ", child.get_active_material(0))
+				# Aktuell ausgewähltes Teil bleibt unverändert
+				pass
 
-
-
+# Funktion zum Zurücksetzen des Kamerazooms bei Rückkehr zum Parent oder höchster Ebene
+func _reset_camera_zoom():
+	var model_size = $camera_rig.calculate_model_dimensions(model_container)
+	$camera_rig.min_zoom = model_size * 1.05
+	$camera_rig.camera_distance = max(model_size * 1.05, $camera_rig.camera_distance)
+	$camera_rig.max_zoom = $camera_rig.min_zoom * 5
+	$camera_rig._handle_zoom()
 
 # Funktion zum Einstellen der Transparenz für nicht ausgewählte Teile
 func make_part_transparent(part: MeshInstance3D):
@@ -112,12 +110,10 @@ func make_part_transparent(part: MeshInstance3D):
 					material = material.duplicate()  # Dupliziere das Material, um eine instanzierte Kopie zu haben
 
 			if material:
-				#print("Setze Transparenz für: ", part.name, ", Oberfläche: ", i)
 				material.set_transparency(BaseMaterial3D.TRANSPARENCY_ALPHA)  # Transparenzmodus auf Alpha setzen
 				material.alpha_scissor_threshold = 0.0  # Deaktiviere Alpha-Scissor
 				material.albedo_color.a = 0.2  # Setze die Albedo-Farbe auf 20% Sichtbarkeit (80% transparent)
 				part.set_surface_override_material(i, material)
-				#print("Transparenzparameter für Oberfläche ", i, " geändert.")
 
 # Funktion zum vollständigen Zurücksetzen der Sichtbarkeit aller Modellteile
 func reset_model_visibility():
@@ -133,8 +129,7 @@ func reset_model_visibility():
 				if material:
 					material.albedo_color.a = 1.0  # Setze den Alpha-Wert auf 100% Sichtbarkeit zurück
 					material.set_transparency(BaseMaterial3D.TRANSPARENCY_DISABLED)  # Deaktiviere den Transparenzmodus
-					child.set_surface_override_material(i, material)  # Setze das Material zurück
-	#print("Alle Teile wieder vollständig sichtbar gemacht.")
+					child.set_surface_override_material(i, material)
 
 # Funktion zur Überprüfung, ob `current_node` ein direktes Child von `parent_node` ist
 func _is_direct_child(parent_node: Node, current_node: Node) -> bool:
