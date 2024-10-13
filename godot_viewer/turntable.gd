@@ -2,9 +2,52 @@ extends Node3D
 
 @export var Scale = 2  # Basis-Skalierungswert
 @export var Zoom_Multiplier = 0.35  # Multiplikator für die Kameraentfernung (kleinere Werte erhöhen die Distanz)
+@export var transition_duration = 0.5  # Dauer des Schwenk-Übergangs in Sekunden
+
 var original_position = Vector3()  # Speichert die ursprüngliche Position des `model_container`
 var original_pivot = Vector3()  # Speichert den ursprünglichen Pivot-Punkt
 var current_pivot = Vector3()  # Speichert den aktuellen Drehmittelpunkt des Modells
+
+var target_pivot = Vector3()  # Zielpivot für die Animation
+var transition_elapsed = 0.0  # Zeit, die für den Übergang bisher vergangen ist
+var is_transitioning = false  # Gibt an, ob ein Übergang aktiv ist
+
+# Speichert die ursprüngliche Position und den Pivot-Punkt beim Start des Programms
+func _ready():
+	# Speichere die ursprüngliche Position des `model_container`
+	original_position = $model_container.position
+	# Berechne den aktuellen Pivot-Punkt basierend auf dem gesamten Modell
+	original_pivot = calculate_geometric_center($model_container)
+	current_pivot = original_pivot  # Initialisieren des aktuellen Pivot-Punkts
+	#print("Ursprünglicher Mittelpunkt des Modells berechnet: ", original_pivot)
+	# Setze den Mittelpunkt initial auf das gesamte Modell
+	set_focus_on_object($model_container)
+	# Führe die dynamische Skalierung basierend auf der Modellgröße durch
+	setup_scaling_based_on_aabb($model_container)
+
+# Wird im Prozess-Callback aufgerufen, um den Übergang zu animieren
+func _process(delta):
+	if is_transitioning:
+		# Erhöhe die verstrichene Zeit
+		transition_elapsed += delta
+
+		# Berechne, wie weit der Übergang fortgeschritten ist (zwischen 0 und 1)
+		var t = clamp(transition_elapsed / transition_duration, 0, 1)
+
+		# Verwende lerp für einen fließenden Übergang zwischen current_pivot und target_pivot
+		var new_pivot = current_pivot.lerp(target_pivot, t)
+
+		# Berechne den Offset zwischen dem alten und dem neuen Pivot
+		var offset = new_pivot - current_pivot
+
+		# Verschiebe das Modell entsprechend
+		$model_container.position -= offset
+		current_pivot = new_pivot  # Aktualisiere den aktuellen Pivot
+
+		# Beende den Übergang, wenn t = 1 erreicht ist
+		if t >= 1.0:
+			is_transitioning = false
+
 
 # Berechnet den geometrischen Mittelpunkt aller sichtbaren Meshes innerhalb des Modells
 func calculate_geometric_center(target_node: Node) -> Vector3:
@@ -24,7 +67,7 @@ func calculate_geometric_center(target_node: Node) -> Vector3:
 	else:
 		return target_node.global_transform.origin  # Standard: Ursprung des Knotens
 
-# Setzt den Fokus auf das aktuelle Zielobjekt, indem das Modell relativ verschoben wird
+# Setzt den Fokus auf das aktuelle Zielobjekt, animiert den Übergang
 func set_focus_on_object(target_node: Node):
 	if not target_node:
 		return
@@ -32,14 +75,11 @@ func set_focus_on_object(target_node: Node):
 	# Berechne die neue geometrische Mitte basierend auf dem Zielknoten
 	var new_center = calculate_geometric_center(target_node)
 
-	# Berechne den Verschiebungsvektor (Offset) zwischen der alten Mitte und der neuen
-	var offset = new_center - current_pivot
+	# Setze die Zielposition des Pivot-Points
+	target_pivot = new_center
+	transition_elapsed = 0.0  # Zurücksetzen des Übergangs-Timers
+	is_transitioning = true  # Starte die Animation
 
-	# Passe die Position des `model_container` relativ an, um die neue Mitte als Drehmittelpunkt zu verwenden
-	$model_container.position -= offset  # Verschiebe das gesamte Modell um den Offset
-	current_pivot = new_center  # Setze den neuen Mittelpunkt als aktuellen Pivot
-
-	#print("Neuer geometrischer Mittelpunkt gesetzt auf: ", current_pivot, " - Modell verschoben um Offset: ", offset)
 
 # Berechnet die Axis-Aligned Bounding Box (AABB) für einen MeshNode ohne zusätzliche Transformationen
 func calc_aabb_simple(n: Node) -> AABB:
@@ -54,24 +94,20 @@ func calc_aabb_simple(n: Node) -> AABB:
 
 	return aabb_ret
 
-# Berechnet die Axis-Aligned Bounding Box (AABB) nur für das ausgewählte Mesh (mit Transformation)
+# Dynamische AABB-Berechnung für nur das ausgewählte Mesh
 func calc_aabb_single_mesh(n: Node) -> AABB:
 	var aabb_ret = AABB()
 
-	# Nur wenn es sich um einen MeshInstance3D handelt und ein Mesh vorhanden ist
 	if n is MeshInstance3D and n.mesh:
-		# Hole die lokale AABB des Meshes
-		var local_aabb = n.mesh.get_aabb() #.get_aabb() nimmt NICHT das gewählte Mesh, sondern ALLE... wieso?
-		# Wende die Transformation des Nodes auf das AABB an
-		aabb_ret = local_aabb.transformed(n.transform)
+		# Berechne AABB nur für das spezifische Mesh
+		aabb_ret = n.mesh.get_aabb().transformed(n.transform)
 	
 	return aabb_ret
 
 
-# Berechnet die maximale Breite basierend auf den Vertices eines MeshInstance3D
 func calculate_max_width_from_vertices(mesh_instance: MeshInstance3D) -> float:
 	if not mesh_instance.mesh:
-		return 0.0  # Kein Mesh vorhanden
+		return 0.0
 
 	var vertices = []
 	for i in range(mesh_instance.mesh.get_surface_count()):
@@ -79,63 +115,37 @@ func calculate_max_width_from_vertices(mesh_instance: MeshInstance3D) -> float:
 		if array.size() > Mesh.ARRAY_VERTEX:
 			var surface_vertices = array[Mesh.ARRAY_VERTEX]
 			for vertex in surface_vertices:
-				# Transformiere jeden Vertex mit der Transform des MeshInstance3D (Matrixmultiplikation)
 				vertices.append(mesh_instance.transform.origin + mesh_instance.transform.basis * vertex)
 
-	# Finde die Extrempunkte in den Achsen
+	# Finde die Extrempunkte
 	var min_point = vertices[0]
 	var max_point = vertices[0]
 	for vertex in vertices:
 		min_point = min_point.min(vertex)
 		max_point = max_point.max(vertex)
 
-	# Berechne die Breite (längste Achse) basierend auf den Extrempunkten
 	var size = max_point - min_point
 	return size.length()
 
 
-# Dynamische Anpassung der Skalierung und des Zoom-Verhaltens basierend auf der AABB des Modells
 func setup_scaling_based_on_aabb(model_node: Node):
 	var aabb = calc_aabb_simple(model_node)
 	
-	# Überprüfe, ob das AABB Volumen hat (also ein sichtbares Objekt darstellt)
 	if aabb.has_volume():
 		var max_size = aabb.size[aabb.get_longest_axis_index()]
+		Scale = 2 / max_size
+		Zoom_Multiplier = 0.35 * Scale
 		
-		# Passe die Skalierung basierend auf der größten Dimension des Modells an
-		Scale = 2 / max_size  # Passe diesen Wert ggf. je nach gewünschter Grundskalierung an
-		
-		# Setze einen dynamischen Zoom-Multiplikator basierend auf der Größe
-		Zoom_Multiplier = 0.35 * Scale  # Der Zoom-Multiplikator sollte sich ebenfalls an die Modellgröße anpassen
-		
-		# Setze die initiale Position und Skalierung des Modells
 		$model_container.scale = Vector3(Scale, Scale, Scale)
 		$model_container.position = -Scale * aabb.get_center()
 
-		#print("Modellgröße angepasst - Max Size: ", max_size)
-		#print("Neue Skalierung: ", Scale, ", Neuer Zoom Multiplikator: ", Zoom_Multiplier)
-	else:
-		print("Fehler: AABB des Modells hat kein Volumen!")
-
-# Speichert die ursprüngliche Position und den Pivot-Punkt beim Start des Programms
-func _ready():
-	# Speichere die ursprüngliche Position des `model_container`
-	original_position = $model_container.position
-
-	# Berechne den aktuellen Pivot-Punkt basierend auf dem gesamten Modell
-	original_pivot = calculate_geometric_center($model_container)
-	current_pivot = original_pivot  # Initialisieren des aktuellen Pivot-Punkts
-	#print("Ursprünglicher Mittelpunkt des Modells berechnet: ", original_pivot)
-
-	# Setze den Mittelpunkt initial auf das gesamte Modell
-	set_focus_on_object($model_container)
-
-	# Führe die dynamische Skalierung basierend auf der Modellgröße durch
-	setup_scaling_based_on_aabb($model_container)
-
-# Setzt das Modell auf die ursprüngliche Position zurück
 func reset_focus():
-	#print("Setze das Modell auf die ursprüngliche Position zurück.")
-	$model_container.position = original_position  # Setze die Position des Modells zurück
-	current_pivot = original_pivot  # Setze den ursprünglichen Pivot wieder ein
-	#print("Modell-Pivot-Punkt auf ursprüngliche Position zurückgesetzt:", current_pivot)
+	$model_container.position = original_position
+	current_pivot = original_pivot
+
+# Setzt den Pivot zurück auf den ursprünglichen Punkt mit einer Animation
+func reset_focus_with_animation():
+	# Setze die Zielposition auf den ursprünglichen Pivot-Punkt (zentriert auf das gesamte Modell)
+	target_pivot = original_pivot
+	transition_elapsed = 0.0  # Setze den Übergangs-Timer zurück
+	is_transitioning = true  # Starte die Animation

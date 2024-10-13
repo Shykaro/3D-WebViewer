@@ -19,11 +19,10 @@ func calculate_model_dimensions(model_node: Node) -> float:
 	var max_size = aabb.size[aabb.get_longest_axis_index()]  # Größte Breite (längste Achse)
 	return max_size
 
-# Funktion zur Begrenzung des Zooms
 func _handle_zoom():
-	# Begrenze den Zoom auf die min und max Werte
 	camera_distance = clamp(camera_distance, min_zoom, max_zoom)
 	$camera_arm/camera.position.z = camera_distance
+
 
 # Eingabeverarbeitung für Zoom und Mausrotation
 func _input(event):
@@ -59,24 +58,14 @@ func _process(delta):
 	rot_y *= 0.965
 	rot_x *= 0.965
 
-# Wird aufgerufen, wenn das Skript initial geladen wird
 func _ready():
 	if model_container == null:
 		print("Fehler: 'model_container' konnte nicht gefunden werden.")
 		return
 
-	# Berechne die Modellbreite und passe den Zoom entsprechend an
 	var model_size = calculate_model_dimensions(model_container)
+	min_zoom = model_size * 1.05
+	camera_distance = min_zoom * 2.5
+	max_zoom = min_zoom * 5
 
-	# Setze den Mindestzoom basierend auf der Modellgröße
-	min_zoom = model_size * 1.05  # Setze den minimalen Zoom 10% über der größten Modellachse
-
-	# Setze den Startabstand der Kamera auf eine angenehme Entfernung (etwas weiter als min_zoom)
-	camera_distance = min_zoom * 2.5  # Die Kamera startet in größerem Abstand
-
-	max_zoom = min_zoom * 5  # Der maximale Zoom kann ein Vielfaches des minimalen Zooms sein
-
-	print("Modellgröße: ", model_size, " | Mindestzoom: ", min_zoom, " | Startabstand: ", camera_distance)
-
-	# Initialisiere den Zoom
 	_handle_zoom()
