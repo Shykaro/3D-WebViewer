@@ -10,7 +10,7 @@ var min_zoom = 2
 var max_zoom = 100
 var last_explosion_time = 0.0
 
-@onready var model_container = $"../turntable/model_container"
+@onready var model_container = $"../turntable/VignetteSubViewport/model_container"
 @onready var turntable = $"../turntable"
 
 var rot_y = 0

@@ -1,10 +1,17 @@
-[gd_scene load_steps=7 format=3 uid="uid://gynpel7qpjrr"]
+[gd_scene load_steps=9 format=3 uid="uid://gynpel7qpjrr"]
 
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
 [ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="3_qtjtw"]
+[ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u1gci"]
+shader = ExtResource("4_o7hb1")
+shader_parameter/focus_center = null
+shader_parameter/vignette_radius = 0.2
+shader_parameter/vignette_softness = 0.5
 
 [sub_resource type="Environment" id="Environment_hg047"]
 background_mode = 1
@@ -18,9 +25,16 @@ script = ExtResource("1_it4ho")
 [node name="turntable" type="Node3D" parent="."]
 script = ExtResource("1_0wb5i")
 
-[node name="model_container" type="Node3D" parent="turntable"]
+[node name="VignettePlane" type="MeshInstance3D" parent="turntable"]
+transform = Transform3D(3933.19, 0, 0, 0, 1974.97, 0, 0, 0, 1.41734, 0, 0, 1.46649)
+material_overlay = SubResource("ShaderMaterial_u1gci")
 
-[node name="model" parent="turntable/model_container" instance=ExtResource("3_qtjtw")]
+[node name="VignetteSubViewport" type="SubViewport" parent="turntable"]
+size = Vector2i(1280, 720)
+
+[node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
+
+[node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("3_qtjtw")]
 
 [node name="camera_rig" type="Node3D" parent="."]
 script = ExtResource("3_p5mvp")

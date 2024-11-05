@@ -1,7 +1,7 @@
 extends Node3D
 
 @onready var camera: Camera3D = $camera_rig/camera_arm/camera
-@onready var model_container: Node3D = $turntable/model_container
+@onready var model_container: Node3D = $turntable/VignetteSubViewport/model_container
 @export var selection_distance = 1000.0
 @export var double_click_time = 0.3
 

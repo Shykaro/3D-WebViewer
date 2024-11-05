@@ -22,11 +22,11 @@ var mesh_original_positions = {}
 var mesh_explosion_targets = {}
 
 func _ready():
-	original_position = $model_container.position
-	original_pivot = calculate_geometric_center($model_container)
+	original_position = $VignetteSubViewport/model_container.position
+	original_pivot = calculate_geometric_center($VignetteSubViewport/model_container)
 	current_pivot = original_pivot
-	set_focus_on_object($model_container)
-	setup_scaling_based_on_aabb($model_container)
+	set_focus_on_object($VignetteSubViewport/model_container)
+	setup_scaling_based_on_aabb($VignetteSubViewport/model_container)
 
 # Beinhaltet die unterschiedlichen Animationen
 func _process(delta):
@@ -35,7 +35,7 @@ func _process(delta):
 		var t = clamp(transition_elapsed / transition_duration, 0, 1)
 		var new_pivot = current_pivot.lerp(target_pivot, t)
 		var offset = new_pivot - current_pivot
-		$model_container.position -= offset
+		$VignetteSubViewport/model_container.position -= offset
 		current_pivot = new_pivot
 		if t >= 1.0:
 			is_transitioning = false
@@ -75,12 +75,12 @@ func calculate_geometric_center(target_node: Node) -> Vector3:
 func start_explosion():
 	mesh_original_positions.clear()
 	mesh_explosion_targets.clear()
-	var center_point = calculate_geometric_center($model_container/model)
+	var center_point = calculate_geometric_center($VignetteSubViewport/model_container/model)
 	var mesh_spheres = {}
 	var total_volume = 0.0
 	is_in_explosion_view = true
 
-	for child in $model_container/model.get_child(0).get_children():
+	for child in $VignetteSubViewport/model_container/model.get_child(0).get_children():
 		if child is MeshInstance3D:
 			var mesh = child
 			var sphere_radius = calculate_bounding_sphere(mesh)
@@ -177,12 +177,12 @@ func setup_scaling_based_on_aabb(model_node: Node):
 		var max_size = aabb.size[aabb.get_longest_axis_index()]
 		Scale = 2 / max_size
 		Zoom_Multiplier = 0.35 * Scale
-		$model_container.scale = Vector3(Scale, Scale, Scale)
-		$model_container.position = -Scale * aabb.get_center()
+		$VignetteSubViewport/model_container.scale = Vector3(Scale, Scale, Scale)
+		$VignetteSubViewport/model_container.position = -Scale * aabb.get_center()
 
 # Setzt den Fokus auf die Ursprungsposition
 func reset_focus():
-	$model_container.position = original_position
+	$VignetteSubViewport/model_container.position = original_position
 	current_pivot = original_pivot
 
 func reset_focus_with_animation():
