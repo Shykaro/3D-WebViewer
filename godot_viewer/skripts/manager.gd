@@ -14,6 +14,7 @@ func _ready():
 
 # Dynamische Erkennung von MeshInstance3D-Knoten
 func find_all_meshes_in_node(node: Node) -> Array:
+	#print("Following manager nodes: ", node.get_children())
 	var meshes = []
 	for child in node.get_children():
 		if child is MeshInstance3D:
@@ -56,18 +57,22 @@ func _select_model_part():
 					_select_parent()
 				return
 			current_node = current_node.get_parent()
-	_select_parent()
+	
+	# Rückkehr zur normalen Ansicht, falls ins Leere geklickt wurde
+	$turntable.reset_explosion()  # Stellt das Modell vollständig wieder her
 
-# Zum Parent wechseln
+# Zum Parent wechseln und Explosion zurücksetzen
 func _select_parent():
 	if selected_part and selected_part.get_parent() is MeshInstance3D:
 		selected_part = selected_part.get_parent()
 		_enter_sub_mode(selected_part)
 	else:
 		$turntable.reset_focus_with_animation()
+		$turntable.reset_explosion()
 		selected_part = null
 		reset_model_visibility()
 		_reset_camera_zoom()
+
 
 # Wechsel in den Sub-Modus
 func _enter_sub_mode(part: Node):

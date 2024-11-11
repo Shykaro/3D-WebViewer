@@ -63,7 +63,8 @@ func _process(delta):
 	if current_rotation_speed > explosion_trigger_speed and (Time.get_ticks_msec() / 1000.0 - last_explosion_time) > explosion_cooldown:
 		print("Explosion View Triggered!")
 		if !turntable.is_in_explosion_view:
-			turntable.start_explosion()
+			#turntable.start_explosion()
+			pass
 		else: 
 			turntable.start_implosion()
 		last_explosion_time = Time.get_ticks_msec() / 1000.0

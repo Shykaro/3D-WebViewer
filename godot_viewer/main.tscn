@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
-[ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="3_qtjtw"]
+[ext_resource type="PackedScene" uid="uid://db80awf6wq8u0" path="res://model/model.glb" id="3_qtjtw"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
 
