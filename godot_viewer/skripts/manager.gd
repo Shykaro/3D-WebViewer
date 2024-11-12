@@ -34,7 +34,7 @@ func _input(event):
 func _select_model_part():
 	var from = camera.project_ray_origin(get_viewport().get_mouse_position())
 	var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * selection_distance
-
+	
 	var ray_query = PhysicsRayQueryParameters3D.new()
 	ray_query.from = from
 	ray_query.to = to
@@ -49,14 +49,20 @@ func _select_model_part():
 				if not selected_part:
 					selected_part = current_node
 					_enter_sub_mode(selected_part)
+					$turntable.start_explosion(selected_part)
 				elif _is_direct_child(selected_part, current_node):
 					selected_part = current_node
 					_enter_sub_mode(selected_part)
+					$turntable.start_explosion(selected_part)
 				else:
 					_select_parent()
+					print("imploding...")
+					$turntable.start_implosion()
 				return
 			current_node = current_node.get_parent()
 	_select_parent()
+	print("imploding...")
+	$turntable.start_implosion()
 
 # Zum Parent wechseln
 func _select_parent():

@@ -58,16 +58,16 @@ func _process(delta):
 	rot_y *= 0.965
 	rot_x *= 0.965
 
-	# Berechne die Rotationsgeschwindigkeit und trigger Explosion bei Schwellenwert
-	current_rotation_speed = abs(rot_y) + abs(rot_x)
-	if current_rotation_speed > explosion_trigger_speed and (Time.get_ticks_msec() / 1000.0 - last_explosion_time) > explosion_cooldown:
-		print("Explosion View Triggered!")
-		if !turntable.is_in_explosion_view:
-			turntable.start_explosion()
-		else: 
-			turntable.start_implosion()
-		last_explosion_time = Time.get_ticks_msec() / 1000.0
-		#print(Time.get_ticks_msec() / 1500.0)
+	## Berechne die Rotationsgeschwindigkeit und trigger Explosion bei Schwellenwert
+	#current_rotation_speed = abs(rot_y) + abs(rot_x)
+	#if current_rotation_speed > explosion_trigger_speed and (Time.get_ticks_msec() / 1000.0 - last_explosion_time) > explosion_cooldown:
+		#print("Explosion View Triggered!")
+		#if !turntable.is_in_explosion_view:
+			#turntable.start_explosion()
+		#else: 
+			#turntable.start_implosion()
+		#last_explosion_time = Time.get_ticks_msec() / 1000.0
+		##print(Time.get_ticks_msec() / 1500.0)
 
 # Initiales Setup der Kamera
 func _ready():
