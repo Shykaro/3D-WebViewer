@@ -13,6 +13,8 @@ var original_position = Vector3()  # Ursprüngliche Position des Containers
 var original_pivot = Vector3()  # Ursprünglicher Pivot
 var current_pivot = Vector3()
 var target_pivot = Vector3()
+var stored_position: Vector3
+
 
 var transition_elapsed = 0.0
 var is_transitioning = false
@@ -26,23 +28,30 @@ var mesh_explosion_targets = {}
 
 func _ready():
 	original_position = model_container.position
+	stored_position = model_container.position  # Einmalige Originalposition speichern
 	original_pivot = calculate_geometric_center(model_container)
 	current_pivot = original_pivot
-	set_focus_on_object(model_container)
 	setup_scaling_based_on_aabb(model_container)
 
-# Beinhaltet die unterschiedlichen Animationen
 func _process(delta):
 	if is_transitioning:
 		transition_elapsed += delta
 		var t = clamp(transition_elapsed / transition_duration, 0, 1)
-		var new_pivot = current_pivot.lerp(target_pivot, t)
-		var offset = new_pivot - current_pivot
-		model_container.position -= offset
-		current_pivot = new_pivot
+		
+		# Sanfter Übergang des Pivot-Punkts vom current zum target_pivot
+		var interpolated_pivot = current_pivot.lerp(target_pivot, t)
+		
+		# Berechne Offset basierend auf dem interpolierten Pivot
+		var offset = interpolated_pivot - current_pivot
+		model_container.position = stored_position - offset  # Dynamische Position basierend auf stored_position
+		
+		current_pivot = interpolated_pivot  # Schrittweises Update des aktuellen Pivot-Punkts
+		
 		if t >= 1.0:
 			is_transitioning = false
-			
+			stored_position = model_container.position  # Speichern der Position nach Übergang
+			#print("Transition to new focus completed at position:", stored_position)
+
 	if is_exploding:
 		explosion_elapsed += delta
 		var t = clamp(explosion_elapsed / explosion_duration, 0, 1)
@@ -132,13 +141,13 @@ func reset_explosion():
 	is_exploding = false
 	is_imploding = false
 
-# Setzt den Fokus mit sanfter Transition auf das Zielobjekt
-func set_focus_on_object(target_node: Node):
+# Setzt den Fokus mit sanfter Transition auf das neue Sub-Modell
+func set_focus_on_object(target_node: MeshInstance3D):
 	if target_node:
-		target_pivot = calculate_geometric_center(target_node)
+		print("Setting focus on:", target_node.name)
+		target_pivot = calculate_geometric_center(target_node)  # Neues Ziel für Pivot festlegen
 		transition_elapsed = 0.0
 		is_transitioning = true
-
 
 # Berechnet die AABB
 func calc_aabb_simple(n: Node) -> AABB:
@@ -197,9 +206,10 @@ func reset_focus():
 	current_pivot = original_pivot
 
 func reset_focus_with_animation():
-	target_pivot = original_pivot
+	target_pivot = original_pivot  # Setze Ziel-Pivot auf die Originalposition
 	transition_elapsed = 0.0
 	is_transitioning = true
+	model_container.position = stored_position  # Position sanft auf gespeicherte Position setzen
 
 # Berechnet die maximale Breite aus den Mesh-Vertices
 func calculate_max_width_from_vertices(mesh_instance: MeshInstance3D) -> float:
