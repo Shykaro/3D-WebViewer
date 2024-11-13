@@ -26,6 +26,8 @@ var explosion_elapsed = 0.0
 var mesh_original_positions = {}
 var mesh_explosion_targets = {}
 
+var is_animation_active = false
+
 func _ready():
 	original_position = model_container.position
 	original_pivot = calculate_geometric_center(model_container)
@@ -39,7 +41,7 @@ func _process(delta):
 		# Interpolierter Pivot-Übergang
 		current_pivot = current_pivot.lerp(target_pivot, t)
 		# Setzt die Position des Containers so, dass `target_pivot` den Fokuspunkt darstellt
-		#model_container.position = original_position - (current_pivot - original_pivot)
+		model_container.position = original_position - (current_pivot - original_pivot)
 		#print("Current MC position: ", model_container.position)
 		if t >= 1.0:
 			is_transitioning = false  # Übergang beendet
@@ -47,23 +49,34 @@ func _process(delta):
 	if is_exploding:
 		explosion_elapsed += delta
 		var t = clamp(explosion_elapsed / explosion_duration, 0, 1)
+	
 		for mesh in mesh_original_positions.keys():
 			var original_pos = mesh_original_positions[mesh]
 			var target_pos = mesh_explosion_targets[mesh]
-			mesh.global_transform.origin = original_pos.lerp(target_pos, t)
+		
+		# Berechne die Position relativ zur Bewegung des Containers
+			mesh.transform.origin = original_pos.lerp(target_pos, t)
+	
 		if t >= 1.0:
 			is_exploding = false
-			
+			is_animation_active = false  # Entsperren nach Abschluss der Explosion
+
 	if is_imploding:
 		explosion_elapsed += delta
 		var t = clamp(explosion_elapsed / explosion_duration, 0, 1)
+
 		for mesh in mesh_original_positions.keys():
 			var original_pos = mesh_original_positions[mesh]
 			var target_pos = mesh_explosion_targets[mesh]
-			mesh.global_transform.origin = target_pos.lerp(original_pos, t)
+
+			# Bewegt jedes Mesh zurück zur ursprünglichen Position relativ zur Containerbewegung
+			mesh.transform.origin = target_pos.lerp(original_pos, t)
+
 		if t >= 1.0:
-			$"..".reset_model_visibility
+			# Implosion beendet, Sichtbarkeit zurücksetzen
+			$"..".reset_model_visibility()  # Korrekte Referenz auf `manager.gd`
 			is_imploding = false
+			is_animation_active = false  # Entsperren nach Abschluss der Explosion
 
 # Berechnet den geometrischen Mittelpunkt
 func calculate_geometric_center(target_node: Node) -> Vector3:
@@ -75,40 +88,42 @@ func calculate_geometric_center(target_node: Node) -> Vector3:
 			count += 1
 	return total_position / count if count > 0 else target_node.global_transform.origin
 
-# Startet eine Explosion, bei der die Teile entlang ihrer relativen Vektoren zum center_point wegfliegen
 func start_explosion(selected_part: MeshInstance3D):
+	if is_animation_active:
+		return  # Verhindert das Starten einer neuen Explosion während einer Animation
+	is_animation_active = true
 	mesh_original_positions.clear()
 	mesh_explosion_targets.clear()
 	
-	# Setze den Mittelpunkt der Explosion auf das ausgewählte Teilmodell
+	# Setze den Mittelpunkt der Explosion auf das ausgewählte Teilmodell und berechne den `container_offset`.
 	var center_point = calculate_geometric_center(selected_part)
+	container_offset = model_container.to_local(center_point)
 	var mesh_spheres = {}
 	is_in_explosion_view = true
 
 	# Schleife zur Einrichtung der Explosion
 	for child in model.get_child(0).get_children():
 		if child is MeshInstance3D and child != selected_part and !is_parent_of(selected_part, child):
-			# Berechne die relative Richtung vom `center_point` zum `child`-Mesh
-			var direction = (child.global_transform.origin - center_point).normalized()
-			# Festlegung der Explosionsentfernung basierend auf dem `explosion_distance`-Parameter und ggf. der Größe des Objekts
+			# Richtung vom `center_point` zum `child`-Mesh in lokalen Koordinaten des Containers
+			var direction = (child.transform.origin - container_offset).normalized()
 			var total_distance = explosion_distance + calculate_bounding_sphere(child) * 0.1
-			# Setze die Zielposition für die Explosion entlang dieser Richtung
-			var target_position = child.global_transform.origin + direction * total_distance
-			# Speichere die Start- und Zielposition für die Animation
-			mesh_original_positions[child] = child.global_transform.origin
+			var target_position = child.transform.origin + direction * total_distance
+
+			# Speichern der relativen Start- und Zielpositionen
+			mesh_original_positions[child] = child.transform.origin
 			mesh_explosion_targets[child] = target_position
 			mesh_spheres[child] = calculate_bounding_sphere(child)
 
-	# Kollisionsprüfung anwenden
 	resolve_collisions(mesh_spheres)
-	
-	# Explosion starten
 	explosion_elapsed = 0.0
 	is_exploding = true
 
 
 # Startet die Implosion und bewegt alle Meshes zurück zu ihrer ursprünglichen Position
 func start_implosion():
+	if is_animation_active:
+		return  # Verhindert das Starten einer neuen Implosion während einer Animation
+	is_animation_active = true
 	explosion_elapsed = 0.0
 	is_imploding = true
 	is_in_explosion_view = false

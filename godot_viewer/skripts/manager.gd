@@ -22,9 +22,9 @@ func find_all_meshes_in_node(node: Node) -> Array:
 			meshes.append_array(find_all_meshes_in_node(child))
 	return meshes
 
-# Eingabeverarbeitung
 func _input(event):
-	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT:
+	# Eingabe nur akzeptieren, wenn keine Animation aktiv ist
+	if !$turntable.is_animation_active and event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT:
 		var current_time = Time.get_ticks_msec() / 1000.0
 		if current_time - last_click_time <= double_click_time:
 			_select_model_part()
@@ -62,20 +62,25 @@ func _select_model_part():
 					$turntable.start_implosion()
 				return
 			current_node = current_node.get_parent()
-	_select_parent()
-	print("imploding...")
-	$turntable.start_implosion()
+
+	# Nur aufrufen, wenn wir nicht schon auf der obersten Ebene sind
+	if selected_part != null:
+		_select_parent()
+		print("imploding...")
+		$turntable.start_implosion()
 
 # Zum Parent wechseln
 func _select_parent():
 	if selected_part and selected_part.get_parent() is MeshInstance3D:
+		# Wechselt auf die übergeordnete Ebene, wenn `selected_part` einen Elternknoten hat
 		selected_part = selected_part.get_parent()
 		_enter_sub_mode(selected_part)
 	else:
-		$turntable.reset_focus_with_animation()
-		selected_part = null
-		#reset_model_visibility()
-		_reset_camera_zoom()
+		# Abbrechen, wenn wir uns auf der obersten Ebene befinden
+		if selected_part != null:
+			$turntable.reset_focus_with_animation()
+			selected_part = null
+			_reset_camera_zoom()
 
 # Wechsel in den Sub-Modus
 func _enter_sub_mode(part: Node):
