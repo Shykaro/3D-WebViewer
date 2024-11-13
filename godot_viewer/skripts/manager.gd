@@ -48,12 +48,14 @@ func _select_model_part():
 			if current_node is MeshInstance3D:
 				if not selected_part:
 					selected_part = current_node
-					_enter_sub_mode(selected_part)
 					$turntable.start_explosion(selected_part)
+					_enter_sub_mode(selected_part)
+					
 				elif _is_direct_child(selected_part, current_node):
 					selected_part = current_node
-					_enter_sub_mode(selected_part)
 					$turntable.start_explosion(selected_part)
+					_enter_sub_mode(selected_part)
+					
 				else:
 					_select_parent()
 					print("imploding...")
@@ -72,7 +74,7 @@ func _select_parent():
 	else:
 		$turntable.reset_focus_with_animation()
 		selected_part = null
-		reset_model_visibility()
+		#reset_model_visibility()
 		_reset_camera_zoom()
 
 # Wechsel in den Sub-Modus
