@@ -1,11 +1,13 @@
-[gd_scene load_steps=9 format=3 uid="uid://gynpel7qpjrr"]
+[gd_scene load_steps=12 format=3 uid="uid://gynpel7qpjrr"]
 
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
 [ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_on0b5"]
+[ext_resource type="Script" path="res://view_manager.gd" id="4_tyus1"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
+[ext_resource type="Script" path="res://view_menu.gd" id="7_mct8y"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_u1gci"]
 shader = ExtResource("4_o7hb1")
@@ -18,6 +20,9 @@ background_mode = 1
 background_color = Color(0.724643, 0.724643, 0.724643, 1)
 ambient_light_source = 1
 reflected_light_source = 1
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_yh3cv"]
+load_path = "res://.godot/imported/BurgerMenu.png-e38c56574dd31d1b52cf072decb10f99.ctex"
 
 [node name="main" type="Node3D"]
 script = ExtResource("1_it4ho")
@@ -33,6 +38,7 @@ material_overlay = SubResource("ShaderMaterial_u1gci")
 size = Vector2i(1280, 720)
 
 [node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
+script = ExtResource("4_tyus1")
 
 [node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_on0b5")]
 
@@ -61,3 +67,43 @@ sky_mode = 1
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Hud" parent="CanvasLayer" instance=ExtResource("4_y7enc")]
+
+[node name="ViewMenu" type="Control" parent="CanvasLayer/Hud"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -67.0
+offset_top = -51.0
+offset_right = -13.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("7_mct8y")
+
+[node name="BurgerButton" type="TextureButton" parent="CanvasLayer/Hud/ViewMenu"]
+layout_mode = 0
+offset_left = -202.0
+offset_top = -223.0
+offset_right = 48.0
+offset_bottom = 27.0
+texture_normal = SubResource("CompressedTexture2D_yh3cv")
+
+[node name="PopupMenu" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="WireFrame" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+
+[node name="Normals" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+
+[node name="Textured" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+
+[node name="Shaded" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
