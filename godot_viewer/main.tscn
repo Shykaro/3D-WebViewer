@@ -1,13 +1,12 @@
-[gd_scene load_steps=12 format=3 uid="uid://gynpel7qpjrr"]
+[gd_scene load_steps=11 format=3 uid="uid://gynpel7qpjrr"]
 
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
 [ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_on0b5"]
-[ext_resource type="Script" path="res://view_manager.gd" id="4_tyus1"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
-[ext_resource type="Script" path="res://view_menu.gd" id="7_mct8y"]
+[ext_resource type="Script" path="res://skripts/view_menu.gd" id="7_mct8y"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_u1gci"]
 shader = ExtResource("4_o7hb1")
@@ -38,7 +37,6 @@ material_overlay = SubResource("ShaderMaterial_u1gci")
 size = Vector2i(1280, 720)
 
 [node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
-script = ExtResource("4_tyus1")
 
 [node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_on0b5")]
 
@@ -107,3 +105,9 @@ layout_mode = 2
 
 [node name="Shaded" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
+
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/BurgerButton" to="CanvasLayer/Hud/ViewMenu" method="_on_burger_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/WireFrame" to="CanvasLayer/Hud/ViewMenu" method="_on_wire_frame_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Normals" to="CanvasLayer/Hud/ViewMenu" method="_on_normals_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Textured" to="CanvasLayer/Hud/ViewMenu" method="_on_textured_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Shaded" to="CanvasLayer/Hud/ViewMenu" method="_on_shaded_pressed"]

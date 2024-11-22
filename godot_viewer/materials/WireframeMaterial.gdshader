@@ -1,14 +1,28 @@
 shader_type spatial;
+render_mode unshaded,wireframe,cull_disabled;
 
-uniform vec4 wire_color = vec4(1.0, 1.0, 1.0, 1.0); // hint_color
+uniform vec4 albedo : source_color = vec4(0.0,0.0,0.0,1.0);
+uniform float outline_width : hint_range(0.0, 10.0, 0.1) = 3.0;
+
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	vec3 clip_normal = mat3(PROJECTION_MATRIX) * (mat3(MODELVIEW_MATRIX) * NORMAL);
+	
+	vec2 offset = normalize(clip_normal.xy) / VIEWPORT_SIZE * 
+		clip_position.w * outline_width * 2.0;
+	
+	
+	
+	clip_position.xy += offset;
+	
+	POSITION = clip_position;
+	
+	
+	
+}
+
 
 void fragment() {
-    vec3 bary = fract(VERTEX * 10.0); // Größe des Wireframes anpassen
-    float line_thickness = 0.02;     // Dicke der Linien
-    float min_distance = min(bary.x, min(bary.y, bary.z));
-    if (min_distance < line_thickness) {
-        ALBEDO = wire_color.rgb;
-    } else {
-        discard; // Hintergrund ausblenden
-    }
+	ALBEDO = albedo.rgb;
 }
