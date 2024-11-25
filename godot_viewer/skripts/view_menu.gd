@@ -4,6 +4,7 @@ extends Node
 @export var wireframe_material: Resource = preload("res://materials/WireframeMaterial.tres")
 @export var textured_material: Resource = preload("res://materials/TexturedMaterial.tres")
 @export var normals_material: Resource = preload("res://materials/NormalsMaterial.tres")
+@export var active_material: Resource
 @onready var model_container: Node3D = $"../../../turntable/VignetteSubViewport/model_container"
 
 # Referenzen für Popup-Menü und Button
@@ -12,15 +13,14 @@ extends Node
 
 # Originalmaterialien speichern
 var original_materials = {}
-var menu_open = false  # Status des Menüs
+@export var menu_open = false  # Status des Menüs
 
 func _ready():
 	_save_original_materials()  # Speichert die Originalmaterialien des Modells
 	_update_menu_visibility()  # Menü initial ausblenden
 	
 
-# --- Popup-Menü-Logik ---
-# Öffnet oder schließt das Popup-Menü
+# Blockiere Eingaben, während Menü interagiert wird
 func _on_burger_button_pressed():
 	menu_open = not menu_open
 	_update_menu_visibility()
@@ -70,20 +70,18 @@ func _save_original_materials():
 
 # Setzt ein bestimmtes Material für das gesamte Modell
 func _set_model_material(material: Resource):
+	active_material = material  # Speichere das aktive Material
 	var meshes = _find_all_meshes_in_node(model_container)
 	for mesh in meshes:
 		if mesh.mesh:
 			for i in range(mesh.mesh.get_surface_count()):
 				mesh.set_surface_override_material(i, material)
 
-# Setzt die Originalmaterialien zurück
 func _reset_to_original_material():
 	var meshes = _find_all_meshes_in_node(model_container)
 	for mesh in meshes:
-		if mesh in original_materials:
-			var surfaces = original_materials[mesh]
-			for i in range(len(surfaces)):
-				mesh.set_surface_override_material(i, surfaces[i])
+		reset_material_to_original(mesh)
+
 
 # Findet alle MeshInstance3D-Knoten im gegebenen Node
 func _find_all_meshes_in_node(node: Node) -> Array:
@@ -94,3 +92,14 @@ func _find_all_meshes_in_node(node: Node) -> Array:
 		elif child.get_child_count() > 0:
 			meshes.append_array(_find_all_meshes_in_node(child))
 	return meshes
+	
+func reset_material_to_original(part: MeshInstance3D):
+	if part in original_materials:
+		var surfaces = original_materials[part]
+		for i in range(len(surfaces)):
+			part.set_surface_override_material(i, surfaces[i])
+			# Transparenz beibehalten, falls aktiv
+			var material = surfaces[i]
+			if material and material is BaseMaterial3D and material.albedo_color.a < 1.0:
+				material.set_transparency(BaseMaterial3D.TRANSPARENCY_ALPHA)
+				material.albedo_color.a = 0.2

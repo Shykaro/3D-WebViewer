@@ -2,6 +2,8 @@ extends Node3D
 
 @onready var camera: Camera3D = $camera_rig/camera_arm/camera
 @onready var model_container: Node3D = $turntable/VignetteSubViewport/model_container
+@onready var view_menu: Control = $CanvasLayer/Hud/ViewMenu
+
 @export var selection_distance = 1000.0
 @export var double_click_time = 0.3
 
@@ -23,12 +25,17 @@ func find_all_meshes_in_node(node: Node) -> Array:
 	return meshes
 
 func _input(event):
-	# Eingabe nur akzeptieren, wenn keine Animation aktiv ist
+	# Überprüfen, ob Menü geöffnet ist und Maus über einem UI-Element schwebt
+	if view_menu.menu_open and (view_menu.menu_button.is_hovered() or view_menu.popup_menu.get_global_rect().has_point(get_viewport().get_mouse_position())):
+		return  # Ignoriere das Event, wenn Maus über dem Menü schwebt
+
+	# Modellbewegung nur zulassen, wenn kein UI-Element aktiv ist
 	if !$turntable.is_animation_active and event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT:
 		var current_time = Time.get_ticks_msec() / 1000.0
 		if current_time - last_click_time <= double_click_time:
 			_select_model_part()
 		last_click_time = current_time
+
 
 # Auswahl des Modellteils bei Doppelklick
 func _select_model_part():
@@ -48,14 +55,14 @@ func _select_model_part():
 			if current_node is MeshInstance3D:
 				if not selected_part:
 					selected_part = current_node
+					print("exploding...")
 					$turntable.start_explosion(selected_part)
 					_enter_sub_mode(selected_part)
-					
 				elif _is_direct_child(selected_part, current_node):
 					selected_part = current_node
 					$turntable.start_explosion(selected_part)
 					_enter_sub_mode(selected_part)
-					
+					#print("Version2")
 				else:
 					_select_parent()
 					print("imploding...")
@@ -82,10 +89,8 @@ func _select_parent():
 			selected_part = null
 			_reset_camera_zoom()
 
-# Wechsel in den Sub-Modus
 func _enter_sub_mode(part: Node):
 	$turntable.set_focus_on_object(part)
-
 	var current_model_max_size = $turntable.calculate_max_width_from_vertices(part)
 	if current_model_max_size > 0.0:
 		$camera_rig.min_zoom = current_model_max_size * 1.05
@@ -93,7 +98,9 @@ func _enter_sub_mode(part: Node):
 		$camera_rig.max_zoom = $camera_rig.min_zoom * 5
 		$camera_rig._handle_zoom()
 
-	set_transparency_for_all_meshes_in_node(model_container, part)
+	# Aktualisiere Transparenz und Materialien
+	#update_transparency_for_current_view(part)
+	#set_transparency_for_all_meshes_in_node(model_container, part)
 
 # Kamerazoom zurücksetzen
 func _reset_camera_zoom():
@@ -103,7 +110,6 @@ func _reset_camera_zoom():
 	$camera_rig.max_zoom = $camera_rig.min_zoom * 5
 	$camera_rig._handle_zoom()
 
-# Transparenz für nicht ausgewählte Teile setzen
 func make_part_transparent(part: MeshInstance3D):
 	if part.mesh:
 		for i in range(part.mesh.get_surface_count()):
@@ -113,36 +119,54 @@ func make_part_transparent(part: MeshInstance3D):
 				if material:
 					material = material.duplicate()
 
-			if material:
+			# Nur Änderungen vornehmen, wenn Material ein BaseMaterial3D ist
+			if material and material is BaseMaterial3D:
 				material.set_transparency(BaseMaterial3D.TRANSPARENCY_ALPHA)
-				material.alpha_scissor_threshold = 0.0
 				material.albedo_color.a = 0.2
 				part.set_surface_override_material(i, material)
 
-# Transparenz dynamisch setzen
 func set_transparency_for_all_meshes_in_node(node: Node, except_part: MeshInstance3D):
 	var meshes = find_all_meshes_in_node(node)
 	for mesh in meshes:
 		if mesh != except_part:
 			make_part_transparent(mesh)
 
-# Setzt die Sichtbarkeit aller Modellteile zurück
+
 func reset_model_visibility():
 	for child in model_container.get_child(0).get_child(0).get_children():
 		if child is MeshInstance3D:
 			for i in range(child.mesh.get_surface_count()):
 				var material = child.get_surface_override_material(i)
 				if not material:
-					# Verwende surface_get_material statt get_surface_material
 					material = child.mesh.surface_get_material(i)
 					if material:
-						material = material.duplicate()  # Dupliziere das Material, um es zu ändern
+						material = material.duplicate()
 
-				# Wenn ein Material vorhanden ist, stelle es vollständig sichtbar
-				if material:
-					material.albedo_color.a = 1.0  # Alpha-Wert auf 100% Sichtbarkeit setzen
-					material.set_transparency(BaseMaterial3D.TRANSPARENCY_DISABLED)  # Transparenz deaktivieren
+				if material and material is BaseMaterial3D:
+					# Transparenzstatus prüfen und beibehalten
+					if material.albedo_color.a < 1.0:
+						material.albedo_color.a = 0.2
+						material.set_transparency(BaseMaterial3D.TRANSPARENCY_ALPHA)
+					else:
+						material.albedo_color.a = 1.0
+						material.set_transparency(BaseMaterial3D.TRANSPARENCY_DISABLED)
 					child.set_surface_override_material(i, material)
+
+func update_transparency_for_current_view(except_part: MeshInstance3D):
+	var meshes = find_all_meshes_in_node(model_container)
+	for mesh in meshes:
+		if mesh == except_part:
+			# Stelle sicher, dass das ausgewählte Teilmodell vollständig sichtbar ist
+			view_menu.reset_material_to_original(mesh)
+		else:
+			# Wende Transparenz oder aktives Material auf die anderen Teile an
+			if view_menu.active_material == view_menu.wireframe_material:
+				# Im Wireframe-Modus das Wireframe-Material anwenden
+				mesh.set_surface_override_material(0, view_menu.active_material.duplicate())
+			else:
+				# Andernfalls Transparenz anwenden
+				make_part_transparent(mesh)
+
 
 # Überprüfen, ob current_node ein direktes Child von parent_node ist
 func _is_direct_child(parent_node: Node, current_node: Node) -> bool:
