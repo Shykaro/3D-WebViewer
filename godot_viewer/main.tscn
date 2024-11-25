@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://gynpel7qpjrr"]
+[gd_scene load_steps=13 format=3 uid="uid://gynpel7qpjrr"]
 
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
@@ -22,6 +22,16 @@ reflected_light_source = 1
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_yh3cv"]
 load_path = "res://.godot/imported/BurgerMenu.png-e38c56574dd31d1b52cf072decb10f99.ctex"
+
+[sub_resource type="Shader" id="Shader_ax1fl"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.3.stable's CanvasItemMaterial.
+
+shader_type canvas_item;
+render_mode blend_mix;
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kqsm8"]
+shader = SubResource("Shader_ax1fl")
 
 [node name="main" type="Node3D"]
 script = ExtResource("1_it4ho")
@@ -52,7 +62,7 @@ environment = SubResource("Environment_hg047")
 
 [node name="cam_light" type="DirectionalLight3D" parent="camera_rig/camera_arm/camera"]
 transform = Transform3D(0.289467, 0.496136, -0.818571, -0.327378, 0.854925, 0.402401, 0.899463, 0.1515, 0.409896, -3.83716, -1.98567, -2.48561)
-light_energy = 0.7
+light_energy = 0.4
 shadow_bias = 2.0
 sky_mode = 1
 
@@ -83,28 +93,41 @@ script = ExtResource("7_mct8y")
 
 [node name="BurgerButton" type="TextureButton" parent="CanvasLayer/Hud/ViewMenu"]
 layout_mode = 0
-offset_left = -202.0
-offset_top = -223.0
-offset_right = 48.0
+offset_left = -10.0
+offset_top = -24.0
+offset_right = 37.0
 offset_bottom = 27.0
 texture_normal = SubResource("CompressedTexture2D_yh3cv")
+ignore_texture_size = true
+stretch_mode = 0
 
 [node name="PopupMenu" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu"]
+material = SubResource("ShaderMaterial_kqsm8")
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -124.0
+offset_top = -306.0
+offset_right = 48.0
+offset_bottom = -44.0
 
 [node name="WireFrame" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
+size_flags_vertical = 3
+text = "show Wireframe"
 
 [node name="Normals" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
+size_flags_vertical = 3
+text = "show Normals"
 
 [node name="Textured" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
+size_flags_vertical = 3
+text = "show Textures"
 
 [node name="Shaded" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
+size_flags_vertical = 3
+text = "show Standard"
 
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/BurgerButton" to="CanvasLayer/Hud/ViewMenu" method="_on_burger_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/WireFrame" to="CanvasLayer/Hud/ViewMenu" method="_on_wire_frame_pressed"]

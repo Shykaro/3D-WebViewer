@@ -5,9 +5,10 @@ extends Control
 @onready var camera: Camera3D = $"../../camera_rig/camera_arm/camera" # Referenz zur Camera3D Node
 
 func _ready():
-	if not check_button.is_connected("toggled", Callable(self, "_on_check_button_toggled")):
-		check_button.toggled.connect(_on_check_button_toggled)
-	#change_camera_background_color(Color(1, 1, 1))  #Setze StandardEnvironment Color
+	#if not check_button.is_connected("toggled", Callable(self, "_on_check_button_toggled")):
+		#check_button.toggled.connect(_on_check_button_toggled)
+	##change_camera_background_color(Color(1, 1, 1))  #Setze StandardEnvironment Color
+	pass
 
 func _on_check_button_toggled(button_pressed: bool):
 	if button_pressed:

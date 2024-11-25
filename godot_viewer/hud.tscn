@@ -24,22 +24,3 @@ offset_bottom = 607.0
 grow_horizontal = 0
 scale = Vector2(0.185, 0.185)
 texture = ExtResource("1_lfo5e")
-
-[node name="CheckButton" type="CheckButton" parent="."]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -211.0
-offset_top = -184.0
-offset_right = -8.0
-offset_bottom = -153.0
-grow_horizontal = 0
-grow_vertical = 2
-text = "Change Background"
-alignment = 2
-icon_alignment = 2
-
-[connection signal="toggled" from="CheckButton" to="." method="_on_check_button_toggled"]
