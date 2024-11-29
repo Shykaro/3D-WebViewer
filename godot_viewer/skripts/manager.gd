@@ -3,25 +3,33 @@ extends Node3D
 @onready var camera: Camera3D = $camera_rig/camera_arm/camera
 @onready var model_container: Node3D = $turntable/VignetteSubViewport/model_container
 @onready var view_menu: Control = $CanvasLayer/Hud/ViewMenu
+@onready var model: Node3D = $turntable/VignetteSubViewport/model_container/model
 
 @export var selection_distance = 1000.0
 @export var double_click_time = 0.3
 
 var selected_part = null
 var last_click_time = 0
+var meshes = []
 
 # Starte die Traversierung von der höchsten Ebene
 func _ready():
-	find_all_meshes_in_node(model_container)
+	find_all_meshes_in_node(model)
+	for i in range(meshes.size()):
+		#meshes[i].create_trimesh_collision() #ERSTELLT COLLIDERS FÜR ALLE MESHES DES MODELLS BEI INITIAL LOADUP
+		print(meshes[i])
+	
 
-# Dynamische Erkennung von MeshInstance3D-Knoten
+# Dynamische Erkennung von MeshInstance3D-Knoten MUSS ANGEPASST WERDEN DAMIT BELIEBIGE MODELLHIERARCHIEN ERKANNT WERDEN
 func find_all_meshes_in_node(node: Node) -> Array:
-	var meshes = []
 	for child in node.get_children():
 		if child is MeshInstance3D:
 			meshes.append(child)
+			pass
 		elif child.get_child_count() > 0:
-			meshes.append_array(find_all_meshes_in_node(child))
+			#meshes.append_array(find_all_meshes_in_node(child))
+			meshes.append_array(child.get_children())
+			pass
 	return meshes
 
 func _input(event):

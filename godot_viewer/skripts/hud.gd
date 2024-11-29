@@ -1,7 +1,5 @@
 extends Control
 
-# Referenz für den CheckButton
-@onready var check_button: CheckButton = $CheckButton
 @onready var camera: Camera3D = $"../../camera_rig/camera_arm/camera" # Referenz zur Camera3D Node
 
 func _ready():

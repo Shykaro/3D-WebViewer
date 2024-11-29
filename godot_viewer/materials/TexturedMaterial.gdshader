@@ -21,7 +21,7 @@ varying vec3 my_normal;
 
 float ScreenSpaceDither12(vec2 vScreenPos, float time)
 {
-    float vDither = dot( vec2( 171.0, 231.0 ), vScreenPos.xy + time); 
+    float vDither = dot( vec2( 171.0, 231.0 ), vScreenPos.xy + time);
     return fract( vDither / 103.0);
 }
 
@@ -37,7 +37,7 @@ vec4 uniplanar( sampler2D sam, vec3 normal, vec3 position, vec4 fragCoord, float
 	uvY.x *= 1.0;
     vec2 uvZ = -position.xy;
 	uvZ.y *= -1.0;
-    vec3 alpha = abs(normal); 
+    vec3 alpha = abs(normal);
     alpha = smoothContrast(alpha, contrast);
     float dither = ScreenSpaceDither12(fragCoord.xy, TIME-float(tOffset));
     dither = clamp(dither, 0.01, 0.99);
@@ -45,7 +45,7 @@ vec4 uniplanar( sampler2D sam, vec3 normal, vec3 position, vec4 fragCoord, float
     vec3 duvwdx = dFdx(position);
     vec3 duvwdy = dFdy(position);
     // uvs for derivatives Mips
-    vec2 duvdx; 
+    vec2 duvdx;
     vec2 duvdy;
     // "interpolate" the UVs using dither
     vec2 uv;
@@ -56,12 +56,12 @@ vec4 uniplanar( sampler2D sam, vec3 normal, vec3 position, vec4 fragCoord, float
     } else if (1.0-alpha.z > dither) {
         uv = uvY;
         duvdx = duvwdx.zx;
-        duvdy = duvwdy.zx;	
+        duvdy = duvwdy.zx;
     } else {
         uv = uvZ;
         duvdx = duvwdx.xy;
         duvdy = duvwdy.xy;
-    } 
+    }
     vec4 col = textureGrad( sam, uv, duvdx, duvdy);
  	return col;
 }
