@@ -14,11 +14,47 @@ var meshes = []
 
 # Starte die Traversierung von der höchsten Ebene
 func _ready():
-	find_all_meshes_in_node(model)
-	for i in range(meshes.size()):
-		#meshes[i].create_trimesh_collision() #ERSTELLT COLLIDERS FÜR ALLE MESHES DES MODELLS BEI INITIAL LOADUP
-		print(meshes[i])
+	#find_all_meshes_in_node(model) #versucht die Hierarchie mit allen Mesh instanzen auszumachen, gibt array zurück
+	generate_colliders(model)
+	#for i in range(meshes.size()):
+		##meshes[i].create_trimesh_collision() #ERSTELLT COLLIDERS FÜR ALLE MESHES DES MODELLS BEI INITIAL LOADUP
+		#print(meshes[i])
 	
+func generate_colliders(node: Node):
+	if node is MeshInstance3D:
+		node.create_trimesh_collision()
+		print("Generated collider for: ", node)
+	
+	for child in node.get_children():
+		generate_colliders(child)
+		print("running...")
+		
+		
+#func generate_colliders(node: Node): #Geht das auch optimierter? FutureMe: Ja. Rekursion above
+	#for childsLvl1 in node.get_children():
+		#if childsLvl1 is MeshInstance3D:
+			#childsLvl1.create_trimesh_collision()
+			#print("Level 1 Childs: ", childsLvl1)
+		#if childsLvl1.get_child_count() > 0:
+			#for childsLvl2 in childsLvl1.get_children():
+				#if childsLvl2 is MeshInstance3D:
+					#childsLvl2.create_trimesh_collision()
+					#print("Level 2 Childs: ", childsLvl2)
+				#if childsLvl2.get_child_count() > 0:
+					#for childsLvl3 in childsLvl2.get_children():
+						#if childsLvl3 is MeshInstance3D:
+							#childsLvl3.create_trimesh_collision()
+							#print("Level 3 Childs: ", childsLvl3)
+						#if childsLvl3.get_child_count() > 0:
+							#for childsLvl4 in childsLvl3.get_children():
+								#if childsLvl4 is MeshInstance3D:
+									#childsLvl4.create_trimesh_collision()
+									#print("Level 4 Childs: ", childsLvl4)
+								#if childsLvl4.get_child_count() > 0:
+									#for childsLvl5 in childsLvl4.get_children():
+										#if childsLvl5 is MeshInstance3D:
+											#childsLvl5.create_trimesh_collision()
+											#print("Level 5 Childs: ", childsLvl5)
 
 # Dynamische Erkennung von MeshInstance3D-Knoten MUSS ANGEPASST WERDEN DAMIT BELIEBIGE MODELLHIERARCHIEN ERKANNT WERDEN
 func find_all_meshes_in_node(node: Node) -> Array:
@@ -134,7 +170,7 @@ func make_part_transparent(part: MeshInstance3D):
 				part.set_surface_override_material(i, material)
 
 func set_transparency_for_all_meshes_in_node(node: Node, except_part: MeshInstance3D):
-	var meshes = find_all_meshes_in_node(node)
+	meshes = find_all_meshes_in_node(node) #ersetzen!!! GEGEN GESCHEITE UNIVERSALLOGIK
 	for mesh in meshes:
 		if mesh != except_part:
 			make_part_transparent(mesh)
@@ -161,7 +197,7 @@ func reset_model_visibility():
 					child.set_surface_override_material(i, material)
 
 func update_transparency_for_current_view(except_part: MeshInstance3D):
-	var meshes = find_all_meshes_in_node(model_container)
+	meshes = find_all_meshes_in_node(model_container) #ersetzen für universallogik
 	for mesh in meshes:
 		if mesh == except_part:
 			# Stelle sicher, dass das ausgewählte Teilmodell vollständig sichtbar ist
