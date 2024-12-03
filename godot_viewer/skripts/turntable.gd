@@ -74,7 +74,7 @@ func _process(delta):
 
 		if t >= 1.0:
 			# Implosion beendet, Sichtbarkeit zurücksetzen
-			$"..".reset_model_visibility()  # Korrekte Referenz auf `manager.gd`
+			#$"..".reset_model_visibility()  # Korrekte Referenz auf `manager.gd`
 			is_imploding = false
 			is_animation_active = false  # Entsperren nach Abschluss der Explosion
 
