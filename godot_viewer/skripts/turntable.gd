@@ -129,9 +129,14 @@ func start_implosion():
 	is_in_explosion_view = false
 
 # Setzt den Fokus auf ein neues Submodell
-func set_focus_on_object(target_node: MeshInstance3D):
+func set_focus_on_object(target_node: Node3D):
 	if target_node:
-		target_pivot = calculate_geometric_center(target_node)
+		if target_node == model.get_child(0):
+			target_pivot = original_pivot
+			print("setting original pivot")
+		else:
+			target_pivot = calculate_geometric_center(target_node)
+			print("setting original pivot")
 		#print("target pivot set focus: ", target_pivot)
 		transition_elapsed = 0.0
 		is_transitioning = true

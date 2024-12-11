@@ -14,6 +14,8 @@ var current_level = []
 var model_hierarchy = {}
 var last_click_time = 0
 
+var current_node
+
 func _ready():
 	generate_colliders(model)  # Erstelle Collider für das Modell
 	#model_hierarchy = build_hierarchy(model)  # Baue die Modellhierarchie
@@ -24,7 +26,7 @@ func _ready():
 func generate_colliders(node: Node):
 	if node is MeshInstance3D:
 		node.create_trimesh_collision()
-		print("Generated collider for:", node)
+		#print("Generated collider for:", node)
 	for child in node.get_children():
 		generate_colliders(child)
 
@@ -42,9 +44,10 @@ func print_hierarchy(hierarchy: Dictionary, level: int = 0):
 		print("  ",level,"- ",str(node))
 		print_hierarchy(hierarchy[node], level + 1)
 
-# Setzt den Fokus auf die aktuelle Ebene und aktualisiert die Transparenz
+# Setzt den Fokus auf die aktuelle Ebene und aktualisiert die Transparenzw
 func set_focus_on_level(node: Node):
 	selected_part = node
+	current_node = node
 	parent_node = node.get_parent()
 	current_level = []
 	if node.get_child_count() > 0:
@@ -53,6 +56,10 @@ func set_focus_on_level(node: Node):
 				current_level.append(child)
 	update_transparency_for_current_view(node)
 	print("Focused on:", node)
+	#if current_node == model.get_child(0) or selected_part == model.get_child(0):
+		#return
+	$turntable.set_focus_on_object(node)
+	
 
 # Aktualisiert die Transparenz basierend auf der aktuellen Ebene
 func update_transparency_for_current_view(except_node: Node = null):
@@ -85,11 +92,12 @@ func enter_sub_level(node: MeshInstance3D):
 
 # Navigation in die obere Ebene
 func enter_parent_level():
-	for parent in model_hierarchy.keys():
-		if model_hierarchy[parent].has(selected_part):
-			set_focus_on_level(parent)
+	if current_node.get_parent() is MeshInstance3D and current_node != model.get_child(0):
+			set_focus_on_level(current_node.get_parent())
 			$turntable.start_implosion()
-			print("Moved to parent level:", parent)
+			#print("Moved to parent level:", current_node.get_parent())
+			print("!!! current_node: ", current_node)
+			#print("!!! model.get_child(0): ", model.get_child(0))
 			return
 	print("Already at the root level.")
 
@@ -104,44 +112,6 @@ func _input(event):
 			_select_model_part()
 		last_click_time = current_time
 
-## Auswahl des Modellteils bei Doppelklick
-#func _select_model_part():
-	#var from = camera.project_ray_origin(get_viewport().get_mouse_position())
-	#var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * selection_distance
-	#
-	#var ray_query = PhysicsRayQueryParameters3D.new()
-	#ray_query.from = from
-	#ray_query.to = to
-#
-	#var space_state = get_world_3d().direct_space_state
-	#var result = space_state.intersect_ray(ray_query)
-#
-	#if result and result.collider:
-		#var current_node = result.collider
-		#while current_node:
-			#if current_node is MeshInstance3D:
-				#if not selected_part:
-					#selected_part = current_node
-					#print("exploding...")
-					#$turntable.start_explosion(selected_part)
-					#_enter_sub_mode(selected_part)
-				#elif _is_direct_child(selected_part, current_node):
-					#selected_part = current_node
-					#$turntable.start_explosion(selected_part)
-					#_enter_sub_mode(selected_part)
-					##print("Version2")
-				#else:
-					#_select_parent()
-					#print("imploding...")
-					#$turntable.start_implosion()
-				#return
-			#current_node = current_node.get_parent()
-#
-	## Nur aufrufen, wenn wir nicht schon auf der obersten Ebene sind
-	#if selected_part != null:
-		#_select_parent()
-		#print("imploding...")
-		#$turntable.start_implosion()
 
 func _select_model_part():
 	var from = camera.project_ray_origin(get_viewport().get_mouse_position())
@@ -154,22 +124,24 @@ func _select_model_part():
 	var result = get_world_3d().direct_space_state.intersect_ray(ray_query)
 
 	if result and result.collider:
-		var current_node = result.collider
+		current_node = result.collider
 
 		# Traverse von StaticBody oder anderem Collider hoch zur MeshInstance3D
 		while current_node:
 			if current_node is MeshInstance3D:
-				print("current node: ", current_node)
-				print("selected part: ", selected_part)
-				if not selected_part:
+				#print("current node: ", current_node)
+				#print("selected part: ", selected_part)
+				if selected_part == model.get_child(0):
 					selected_part = current_node
 					print("exploding...")
 					$turntable.start_explosion(selected_part)
 					set_focus_on_level(selected_part)
+					#$turntable.set_focus_on_object(selected_part)
 				elif _is_direct_child(selected_part, current_node):
 					selected_part = current_node
 					$turntable.start_explosion(selected_part)
 					set_focus_on_level(selected_part)
+					#$turntable.set_focus_on_object(selected_part)
 				else:
 					enter_parent_level()
 				return
@@ -177,6 +149,7 @@ func _select_model_part():
 
 	# Wenn kein Treffer erzielt wird, navigiere ins höhere Level
 	if selected_part != null:
+		print("Sheise is das hier")
 		enter_parent_level()
 
 
