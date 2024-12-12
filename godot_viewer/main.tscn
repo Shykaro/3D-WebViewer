@@ -3,8 +3,8 @@
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
+[ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_aj4m2"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
-[ext_resource type="PackedScene" uid="uid://c0g28tm11djak" path="res://model/alt_models/modelU.glb" id="4_tjtb7"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
 [ext_resource type="Script" path="res://skripts/view_menu.gd" id="7_mct8y"]
 
@@ -48,7 +48,7 @@ size = Vector2i(1280, 720)
 
 [node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
 
-[node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_tjtb7")]
+[node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_aj4m2")]
 
 [node name="camera_rig" type="Node3D" parent="."]
 script = ExtResource("3_p5mvp")
