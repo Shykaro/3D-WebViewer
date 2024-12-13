@@ -65,5 +65,6 @@ zoom_out={
 
 [rendering]
 
+renderer/rendering_method.mobile="forward_plus"
 renderer/rendering_method.web="forward_plus"
 textures/vram_compression/import_etc2_astc=true
