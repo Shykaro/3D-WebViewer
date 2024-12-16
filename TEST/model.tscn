@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://bnloadjrxmq1o"]
+
+[ext_resource type="PackedScene" uid="uid://l45boaup3xj7" path="res://model.glb" id="1_evp40"]
+[ext_resource type="Material" uid="uid://b3m5tg02gw6d" path="res://Wireframe.tres" id="2_lqueh"]
+
+[node name="model" instance=ExtResource("1_evp40")]
+
+[node name="Cube" parent="Scene Collection" index="0"]
+surface_material_override/0 = ExtResource("2_lqueh")
+
+[node name="Cube_001" parent="Scene Collection" index="1"]
+surface_material_override/0 = ExtResource("2_lqueh")
+
+[node name="Icosphere" parent="Scene Collection" index="3"]
+surface_material_override/0 = ExtResource("2_lqueh")

@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://bukily7rfkemv"]
+
+[ext_resource type="PackedScene" uid="uid://c0h6w1j2htrtf" path="res://model.glb" id="1_2k6c7"]
+[ext_resource type="Material" uid="uid://cgwkk1g02i8bo" path="res://new_shader_material.tres" id="2_n738o"]
+
+[node name="model" instance=ExtResource("1_2k6c7")]
+
+[node name="Cube" parent="Scene Collection" index="0"]
+surface_material_override/0 = ExtResource("2_n738o")
+
+[node name="Cube_001" parent="Scene Collection" index="1"]
+surface_material_override/0 = ExtResource("2_n738o")

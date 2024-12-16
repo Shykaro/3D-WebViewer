@@ -75,7 +75,7 @@ func _ready():
 		print("Fehler: 'model_container' konnte nicht gefunden werden.")
 		return
 
-	var model_size = calculate_model_dimensions(model_container)
+	var model_size = calculate_model_dimensions(model_container.get_child(0))
 	min_zoom = model_size * 1.05
 	camera_distance = min_zoom * 2.5
 	max_zoom = min_zoom * 5

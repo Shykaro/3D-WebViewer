@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://bfyccufoqaa7g"]
+
+[ext_resource type="Shader" path="res://materials/MatCap.gdshader" id="1_cwwtg"]
+[ext_resource type="Texture2D" uid="uid://d26n2m4tf0jye" path="res://assets/MatCap2.jpg" id="2_m8eqj"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_cwwtg")
+shader_parameter/margin = 0.084
+shader_parameter/is_spatial = false
+shader_parameter/matcap = ExtResource("2_m8eqj")

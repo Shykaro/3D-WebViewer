@@ -7,7 +7,7 @@ extends Node3D
 @export var explosion_duration = 1.0
 
 @onready var model_container: Node3D = $VignetteSubViewport/model_container
-@onready var model: Node3D = $VignetteSubViewport/model_container/model
+@onready var model: Node3D = model_container.get_child(0)
 
 var original_position = Vector3()  # Ursprüngliche Position des Containers
 var original_pivot = Vector3()  # Ursprünglicher Pivot
@@ -30,9 +30,9 @@ var is_animation_active = false
 
 func _ready():
 	original_position = model_container.position
-	original_pivot = calculate_geometric_center(model_container)
+	original_pivot = calculate_geometric_center(model)
 	current_pivot = original_pivot
-	setup_scaling_based_on_aabb(model_container)
+	setup_scaling_based_on_aabb(model)
 
 func _process(delta):
 	if is_transitioning:
@@ -43,7 +43,7 @@ func _process(delta):
 		# Setzt die Position des Containers so, dass `target_pivot` den Fokuspunkt darstellt
 		model_container.position = original_position - (current_pivot - original_pivot)
 		#print("Current MC position: ", model_container.position)
-		if t >= 1.0:
+		if t >= 0.4:
 			is_transitioning = false  # Übergang beendet
 
 	if is_exploding:
@@ -78,15 +78,64 @@ func _process(delta):
 			is_imploding = false
 			is_animation_active = false  # Entsperren nach Abschluss der Explosion
 
-# Berechnet den geometrischen Mittelpunkt
+# Berechnet den AABB-Mittelpunkt für das gegebene Node und seine Kinder
 func calculate_geometric_center(target_node: Node) -> Vector3:
-	var total_position = Vector3()
-	var count = 0
-	for child in target_node.get_children():
-		if child is MeshInstance3D and child.visible:
-			total_position += child.global_transform.origin
-			count += 1
-	return total_position / count if count > 0 else target_node.global_transform.origin
+	var combined_aabb = AABB()
+	var has_meshes = _collect_mesh_aabbs(target_node, combined_aabb)
+	
+	if has_meshes and combined_aabb.has_volume():
+		# Debug-Ausgabe für die Größe der AABB (Höhe = y-Achse)
+		print("AABB Größe: ", combined_aabb.size)
+		print("AABB Höhe (Y-Achse): ", combined_aabb.size.y)  # Höhe ausgeben
+		print("AABB Mittelpunkt: ", combined_aabb.get_center())
+		return combined_aabb.get_center()
+	else:
+		print("Fallback to node origin")
+		return target_node.global_transform.origin
+
+
+# Rekursive Sammlung der AABBs aller MeshInstance3D-Nodes
+func _collect_mesh_aabbs(node: Node, combined_aabb: AABB) -> bool:
+	var found_mesh = false
+	if node is MeshInstance3D and node.visible and node.mesh:
+		# Lokale AABB und Transformation in Weltkoordinaten
+		var local_aabb = node.mesh.get_aabb()
+		var global_aabb = _transform_aabb(local_aabb, node.global_transform)
+		
+		# Merge in die kombinierte AABB
+		if not combined_aabb.has_volume():
+			combined_aabb = global_aabb
+		else:
+			combined_aabb = combined_aabb.merge(global_aabb)
+		
+		found_mesh = true
+	
+	# Rekursiv durch alle Child-Nodes iterieren
+	for child in node.get_children():
+		if _collect_mesh_aabbs(child, combined_aabb):
+			found_mesh = true
+	
+	return found_mesh
+
+# Transformiert eine AABB mithilfe einer Transform3D-Matrix in Weltkoordinaten
+func _transform_aabb(local_aabb: AABB, transform: Transform3D) -> AABB:
+	var points = [
+		Vector3(local_aabb.position.x, local_aabb.position.y, local_aabb.position.z),
+		Vector3(local_aabb.position.x + local_aabb.size.x, local_aabb.position.y, local_aabb.position.z),
+		Vector3(local_aabb.position.x, local_aabb.position.y + local_aabb.size.y, local_aabb.position.z),
+		Vector3(local_aabb.position.x, local_aabb.position.y, local_aabb.position.z + local_aabb.size.z),
+		Vector3(local_aabb.position.x + local_aabb.size.x, local_aabb.position.y + local_aabb.size.y, local_aabb.position.z),
+		Vector3(local_aabb.position.x + local_aabb.size.x, local_aabb.position.y, local_aabb.position.z + local_aabb.size.z),
+		Vector3(local_aabb.position.x, local_aabb.position.y + local_aabb.size.y, local_aabb.position.z + local_aabb.size.z),
+		Vector3(local_aabb.position.x + local_aabb.size.x, local_aabb.position.y + local_aabb.size.y, local_aabb.position.z + local_aabb.size.z),
+	]
+	
+	# Erstelle eine neue AABB basierend auf den transformierten Punkten
+	var transformed_aabb = AABB(transform * points[0], Vector3.ZERO)
+	for point in points:
+		transformed_aabb = transformed_aabb.expand(transform * point)
+	return transformed_aabb
+
 
 func start_explosion(selected_part: MeshInstance3D):
 	if is_animation_active:
@@ -131,12 +180,12 @@ func start_implosion():
 # Setzt den Fokus auf ein neues Submodell
 func set_focus_on_object(target_node: Node3D):
 	if target_node:
-		if target_node == model.get_child(0):
+		if target_node == model:
 			target_pivot = original_pivot
-			print("setting original pivot")
+			#print("setting original pivot")
 		else:
 			target_pivot = calculate_geometric_center(target_node)
-			print("setting original pivot")
+			#print("setting focussed pivot")
 		#print("target pivot set focus: ", target_pivot)
 		transition_elapsed = 0.0
 		is_transitioning = true

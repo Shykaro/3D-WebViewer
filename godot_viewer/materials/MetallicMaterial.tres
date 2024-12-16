@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://c3417ag2rbx3t"]
+
+[ext_resource type="Shader" path="res://materials/MetallicMaterial.gdshader" id="1_3fu0h"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_3fu0h")
+shader_parameter/baseColor = Color(0.687215, 0.687215, 0.687215, 1)
+shader_parameter/gradientBasis = Vector3(3, 3, 3)
+shader_parameter/gradientBasisDistort = Vector3(0, 0, 0)
+shader_parameter/gradientBasisSpeed = 0.0
+shader_parameter/refractionSplit = 0.0
+shader_parameter/refractionSplitPower = 1.0
+shader_parameter/refractionAffect = 0.8

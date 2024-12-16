@@ -2,8 +2,10 @@ extends Node
 
 # Materialien für die verschiedenen Ansichten
 @export var wireframe_material: Resource = preload("res://materials/WireframeMaterial.tres")
-@export var textured_material: Resource = preload("res://materials/TexturedMaterial.tres")
+@export var textured_material: Resource = preload("res://materials/UVGridTexture.tres")
 @export var normals_material: Resource = preload("res://materials/NormalsMaterial.tres")
+@export var metallic_material: Resource = preload("res://materials/MetallicMaterial.tres")
+@export var matcap_material: Resource = preload("res://materials/MatCapMaterial.tres")
 @export var active_material: Resource
 @onready var model_container: Node3D = $"../../../turntable/VignetteSubViewport/model_container"
 
@@ -37,7 +39,7 @@ func _on_wire_frame_pressed():
 	_update_menu_visibility()
 
 # Callback-Funktion: Texturierte Ansicht aktivieren
-func _on_textured_pressed():
+func _on_uv_grid_pressed():
 	_set_model_material(textured_material)
 	menu_open = false  # Menü schließen nach Auswahl
 	_update_menu_visibility()
@@ -48,11 +50,24 @@ func _on_normals_pressed():
 	menu_open = false  # Menü schließen nach Auswahl
 	_update_menu_visibility()
 
+func _on_metallic_pressed():
+	_set_model_material(metallic_material)
+	menu_open = false  # Menü schließen nach Auswahl
+	_update_menu_visibility()
+
+func _on_mat_cap_pressed():
+	_set_model_material(matcap_material)
+	menu_open = false  # Menü schließen nach Auswahl
+	_update_menu_visibility()
+
 # Callback-Funktion: Schattierte Ansicht (Standard) aktivieren
 func _on_shaded_pressed():
 	_reset_to_original_material()
 	menu_open = false  # Menü schließen nach Auswahl
 	_update_menu_visibility()
+	
+
+
 
 # Speichert die Originalmaterialien des Modells
 func _save_original_materials():

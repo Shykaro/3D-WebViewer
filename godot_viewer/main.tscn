@@ -112,17 +112,30 @@ offset_bottom = -44.0
 [node name="WireFrame" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
 size_flags_vertical = 3
+disabled = true
 text = "show Wireframe"
 
 [node name="Normals" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
 size_flags_vertical = 3
+disabled = true
 text = "show Normals"
 
-[node name="Textured" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+[node name="UvGrid" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
 size_flags_vertical = 3
-text = "show Textures"
+text = "show UVs
+"
+
+[node name="Metallic" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "show Metallic"
+
+[node name="MatCap" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "show MatCap"
 
 [node name="Shaded" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
@@ -132,5 +145,7 @@ text = "show Standard"
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/BurgerButton" to="CanvasLayer/Hud/ViewMenu" method="_on_burger_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/WireFrame" to="CanvasLayer/Hud/ViewMenu" method="_on_wire_frame_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Normals" to="CanvasLayer/Hud/ViewMenu" method="_on_normals_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Textured" to="CanvasLayer/Hud/ViewMenu" method="_on_textured_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/UvGrid" to="CanvasLayer/Hud/ViewMenu" method="_on_uv_grid_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Metallic" to="CanvasLayer/Hud/ViewMenu" method="_on_metallic_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/MatCap" to="CanvasLayer/Hud/ViewMenu" method="_on_mat_cap_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Shaded" to="CanvasLayer/Hud/ViewMenu" method="_on_shaded_pressed"]

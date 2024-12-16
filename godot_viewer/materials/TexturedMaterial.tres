@@ -1,7 +1,9 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://18f33tfpheqc"]
 
-[ext_resource type="Shader" path="res://materials/TexturedMaterial.gdshader" id="1_esfnt"]
+[ext_resource type="Shader" path="res://materials/MatCap.gdshader" id="1_s3gaw"]
 
 [resource]
 render_priority = 0
-shader = ExtResource("1_esfnt")
+shader = ExtResource("1_s3gaw")
+shader_parameter/margin = 0.008
+shader_parameter/is_spatial = false

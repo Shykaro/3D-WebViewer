@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://b7dow1gokp5s8"]
+
+[ext_resource type="PackedScene" uid="uid://l45boaup3xj7" path="res://model.glb" id="1_dywul"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.2276)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.102958, 1.37373, 1.97044)
+
+[node name="model" parent="." instance=ExtResource("1_dywul")]
