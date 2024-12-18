@@ -1,0 +1,151 @@
+[gd_scene load_steps=13 format=3 uid="uid://gynpel7qpjrr"]
+
+[ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
+[ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
+[ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
+[ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_aj4m2"]
+[ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
+[ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
+[ext_resource type="Script" path="res://skripts/view_menu.gd" id="7_mct8y"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u1gci"]
+shader = ExtResource("4_o7hb1")
+shader_parameter/focus_center = null
+shader_parameter/vignette_radius = 0.2
+shader_parameter/vignette_softness = 0.5
+
+[sub_resource type="Environment" id="Environment_hg047"]
+background_mode = 1
+background_color = Color(0.724643, 0.724643, 0.724643, 1)
+ambient_light_source = 1
+reflected_light_source = 1
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_yh3cv"]
+load_path = "res://.godot/imported/BurgerMenu.png-e38c56574dd31d1b52cf072decb10f99.ctex"
+
+[sub_resource type="Shader" id="Shader_ax1fl"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.3.stable's CanvasItemMaterial.
+
+shader_type canvas_item;
+render_mode blend_mix;
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kqsm8"]
+shader = SubResource("Shader_ax1fl")
+
+[node name="main" type="Node3D"]
+script = ExtResource("1_it4ho")
+
+[node name="turntable" type="Node3D" parent="."]
+script = ExtResource("1_0wb5i")
+
+[node name="VignettePlane" type="MeshInstance3D" parent="turntable"]
+transform = Transform3D(3933.19, 0, 0, 0, 1974.97, 0, 0, 0, 1.41734, 0, 0, 1.46649)
+material_overlay = SubResource("ShaderMaterial_u1gci")
+
+[node name="VignetteSubViewport" type="SubViewport" parent="turntable"]
+size = Vector2i(1280, 720)
+
+[node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
+
+[node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_aj4m2")]
+
+[node name="camera_rig" type="Node3D" parent="."]
+script = ExtResource("3_p5mvp")
+
+[node name="camera_arm" type="Node3D" parent="camera_rig"]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0)
+
+[node name="camera" type="Camera3D" parent="camera_rig/camera_arm"]
+transform = Transform3D(1, 0, 0, 0, 1, -2.98023e-08, 0, 0, 1, 0, 0, 3)
+environment = SubResource("Environment_hg047")
+
+[node name="cam_light" type="DirectionalLight3D" parent="camera_rig/camera_arm/camera"]
+transform = Transform3D(0.289467, 0.496136, -0.818571, -0.327378, 0.854925, 0.402401, 0.899463, 0.1515, 0.409896, -3.83716, -1.98567, -2.48561)
+light_energy = 0.4
+shadow_bias = 2.0
+sky_mode = 1
+
+[node name="stage_light" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.646883, 0.39527, -0.652153, 0, 0.855183, 0.518326, 0.762589, -0.335296, 0.553204, -3.83716, 5.60313, 1.16251)
+light_energy = 0.4
+shadow_bias = 2.0
+sky_mode = 1
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Hud" parent="CanvasLayer" instance=ExtResource("4_y7enc")]
+
+[node name="ViewMenu" type="Control" parent="CanvasLayer/Hud"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -67.0
+offset_top = -51.0
+offset_right = -13.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("7_mct8y")
+
+[node name="BurgerButton" type="TextureButton" parent="CanvasLayer/Hud/ViewMenu"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = -24.0
+offset_right = 37.0
+offset_bottom = 27.0
+texture_normal = SubResource("CompressedTexture2D_yh3cv")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="PopupMenu" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu"]
+material = SubResource("ShaderMaterial_kqsm8")
+layout_mode = 0
+offset_left = -124.0
+offset_top = -306.0
+offset_right = 48.0
+offset_bottom = -44.0
+
+[node name="WireFrame" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+disabled = true
+text = "show Wireframe"
+
+[node name="Normals" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+disabled = true
+text = "show Normals"
+
+[node name="UvGrid" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "show UVs
+"
+
+[node name="Metallic" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "show Metallic"
+
+[node name="MatCap" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "show MatCap"
+
+[node name="Shaded" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "show Standard"
+
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/BurgerButton" to="CanvasLayer/Hud/ViewMenu" method="_on_burger_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/WireFrame" to="CanvasLayer/Hud/ViewMenu" method="_on_wire_frame_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Normals" to="CanvasLayer/Hud/ViewMenu" method="_on_normals_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/UvGrid" to="CanvasLayer/Hud/ViewMenu" method="_on_uv_grid_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Metallic" to="CanvasLayer/Hud/ViewMenu" method="_on_metallic_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/MatCap" to="CanvasLayer/Hud/ViewMenu" method="_on_mat_cap_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Shaded" to="CanvasLayer/Hud/ViewMenu" method="_on_shaded_pressed"]
