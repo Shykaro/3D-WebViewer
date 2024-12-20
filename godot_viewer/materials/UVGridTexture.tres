@@ -3,4 +3,5 @@
 [ext_resource type="Texture2D" uid="uid://iw6tjqmxihxy" path="res://assets/UVGrid.png" id="1_icaeu"]
 
 [resource]
+shading_mode = 0
 albedo_texture = ExtResource("1_icaeu")
