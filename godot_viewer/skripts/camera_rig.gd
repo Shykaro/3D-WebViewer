@@ -18,8 +18,10 @@ var rot_x = 0
 var current_rotation_speed = 0.0
 
 # Berechnung der längsten Breite des Modells
+# DIE BERECHNEN NUR DIE MESH INSTANCES DER ERSTEN CHILDREN EBENE DES MODELLS; DESWEGEN FUNKTIONIERT DAS NET
 func calculate_model_dimensions(model_node: Node) -> float:
 	var aabb = turntable.calc_aabb_simple(model_node)
+	print("Calculated turntable model_node Size: ", aabb.size[aabb.get_longest_axis_index()])
 	return aabb.size[aabb.get_longest_axis_index()]
 
 # Eingabeverarbeitung für Zoom und Mausrotation

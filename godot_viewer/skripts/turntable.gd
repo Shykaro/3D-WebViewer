@@ -29,10 +29,12 @@ var mesh_explosion_targets = {}
 var is_animation_active = false
 
 func _ready():
-	original_position = model_container.position
-	original_pivot = calculate_geometric_center(model)
-	current_pivot = original_pivot
+	#original_position = model_container.position
+	#original_pivot = calculate_geometric_center(model)
+	#print("Model aabb size: ", model.global_transform * model.get_aabb().get_center())
 	setup_scaling_based_on_aabb(model)
+	
+	
 
 func _process(delta):
 	if is_transitioning:
@@ -78,64 +80,63 @@ func _process(delta):
 			is_imploding = false
 			is_animation_active = false  # Entsperren nach Abschluss der Explosion
 
-# Berechnet den AABB-Mittelpunkt für das gegebene Node und seine Kinder
-func calculate_geometric_center(target_node: Node) -> Vector3:
-	var combined_aabb = AABB()
-	var has_meshes = _collect_mesh_aabbs(target_node, combined_aabb)
-	
-	if has_meshes and combined_aabb.has_volume():
-		# Debug-Ausgabe für die Größe der AABB (Höhe = y-Achse)
-		print("AABB Größe: ", combined_aabb.size)
-		print("AABB Höhe (Y-Achse): ", combined_aabb.size.y)  # Höhe ausgeben
-		print("AABB Mittelpunkt: ", combined_aabb.get_center())
-		return combined_aabb.get_center()
+# Hauptfunktion zur Berechnung des geometrischen Mittelpunkts THIS FINALLY WORKS JAAAAAAAAAAAAAAAAAAAAAAAA
+func calculate_whole_model_center(hierarchy: Dictionary):
+	var weighted_center = Vector3.ZERO
+	var total_volume = 0.0  # Summe aller AABB-Volumen
+
+	# Rekursive Funktion, die alle Mittelpunkte sammelt und gewichtet
+	total_volume = collect_weighted_mesh_centers(hierarchy, weighted_center)
+
+	print("Total volume: ", total_volume )
+	if total_volume > 0:
+		# Berechnung des gewichteten Mittelpunkts
+		var final_center = weighted_center / total_volume
+		print("Calculated weighted center: ", final_center)
+		original_pivot = final_center
+		current_pivot = final_center
+		model_container.global_transform.origin = final_center
 	else:
-		print("Fallback to node origin")
-		return target_node.global_transform.origin
+		# Falls keine Meshes vorhanden sind
+		print("No meshes found, setting pivot to (0, 0, 0).")
+		original_pivot = Vector3.ZERO
+		current_pivot = Vector3.ZERO
+		model_container.position = Vector3.ZERO
 
+# Rekursive Hilfsfunktion zum Sammeln der gewichteten Mittelpunkte
+func collect_weighted_mesh_centers(hierarchy: Dictionary, weighted_center: Vector3) -> float:
+	var total_volume = 0.0
 
-# Rekursive Sammlung der AABBs aller MeshInstance3D-Nodes
-func _collect_mesh_aabbs(node: Node, combined_aabb: AABB) -> bool:
-	var found_mesh = false
-	if node is MeshInstance3D and node.visible and node.mesh:
-		# Lokale AABB und Transformation in Weltkoordinaten
-		var local_aabb = node.mesh.get_aabb()
-		var global_aabb = _transform_aabb(local_aabb, node.global_transform)
+	for node in hierarchy:
+		# Berechnung des globalen AABB-Mittelpunkts
+		var global_transform = node.global_transform
+		var aabb = node.mesh.get_aabb()
+		var center = global_transform.origin + (global_transform.basis * aabb.get_center())
 		
-		# Merge in die kombinierte AABB
-		if not combined_aabb.has_volume():
-			combined_aabb = global_aabb
-		else:
-			combined_aabb = combined_aabb.merge(global_aabb)
-		
-		found_mesh = true
-	
-	# Rekursiv durch alle Child-Nodes iterieren
-	for child in node.get_children():
-		if _collect_mesh_aabbs(child, combined_aabb):
-			found_mesh = true
-	
-	return found_mesh
+		# Berechnung des AABB-Volumens
+		var volume = aabb.size.x * aabb.size.y * aabb.size.z
 
-# Transformiert eine AABB mithilfe einer Transform3D-Matrix in Weltkoordinaten
-func _transform_aabb(local_aabb: AABB, transform: Transform3D) -> AABB:
-	var points = [
-		Vector3(local_aabb.position.x, local_aabb.position.y, local_aabb.position.z),
-		Vector3(local_aabb.position.x + local_aabb.size.x, local_aabb.position.y, local_aabb.position.z),
-		Vector3(local_aabb.position.x, local_aabb.position.y + local_aabb.size.y, local_aabb.position.z),
-		Vector3(local_aabb.position.x, local_aabb.position.y, local_aabb.position.z + local_aabb.size.z),
-		Vector3(local_aabb.position.x + local_aabb.size.x, local_aabb.position.y + local_aabb.size.y, local_aabb.position.z),
-		Vector3(local_aabb.position.x + local_aabb.size.x, local_aabb.position.y, local_aabb.position.z + local_aabb.size.z),
-		Vector3(local_aabb.position.x, local_aabb.position.y + local_aabb.size.y, local_aabb.position.z + local_aabb.size.z),
-		Vector3(local_aabb.position.x + local_aabb.size.x, local_aabb.position.y + local_aabb.size.y, local_aabb.position.z + local_aabb.size.z),
-	]
-	
-	# Erstelle eine neue AABB basierend auf den transformierten Punkten
-	var transformed_aabb = AABB(transform * points[0], Vector3.ZERO)
-	for point in points:
-		transformed_aabb = transformed_aabb.expand(transform * point)
-	return transformed_aabb
+		# Gewichtung des Mittelpunkts
+		weighted_center += center * volume
+		total_volume += volume
 
+		# Rekursiver Aufruf für Kinder
+		total_volume += collect_weighted_mesh_centers(hierarchy[node], weighted_center)
+	
+	return total_volume
+
+# Funktion zur Berechnung des geometrischen Mittelpunkts eines einzelnen Meshes
+func calculate_mesh_center(mesh_instance: MeshInstance3D) -> Vector3:
+	if mesh_instance and mesh_instance.mesh:
+		# Holen des globalen Transform und AABB-Mittelpunkts
+		var global_transform = mesh_instance.global_transform
+		var aabb = mesh_instance.mesh.get_aabb()
+		var center = global_transform.origin + (global_transform.basis * aabb.get_center())
+		print("Calculated center for MeshInstance3D: ", mesh_instance.name, " -> ", center)
+		return center
+	else:
+		print("Invalid MeshInstance3D or no mesh available")
+		return Vector3.ZERO
 
 func start_explosion(selected_part: MeshInstance3D):
 	if is_animation_active:
@@ -145,7 +146,7 @@ func start_explosion(selected_part: MeshInstance3D):
 	mesh_explosion_targets.clear()
 	
 	# Setze den Mittelpunkt der Explosion auf das ausgewählte Teilmodell und berechne den `container_offset`.
-	var center_point = calculate_geometric_center(selected_part)
+	var center_point = calculate_mesh_center(selected_part)
 	container_offset = model_container.to_local(center_point)
 	var mesh_spheres = {}
 	is_in_explosion_view = true
@@ -184,7 +185,7 @@ func set_focus_on_object(target_node: Node3D):
 			target_pivot = original_pivot
 			#print("setting original pivot")
 		else:
-			target_pivot = calculate_geometric_center(target_node)
+			target_pivot = calculate_mesh_center(target_node)
 			#print("setting focussed pivot")
 		#print("target pivot set focus: ", target_pivot)
 		transition_elapsed = 0.0

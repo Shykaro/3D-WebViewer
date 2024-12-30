@@ -19,8 +19,12 @@ var current_node
 func _ready():
 	generate_colliders(model)  # Erstelle Collider für das Modell
 	model_hierarchy = build_hierarchy(model)  # Baue die Modellhierarchie
-	set_focus_on_level(model)  # Starte auf der obersten Ebene
-	#print_hierarchy(model_hierarchy)  # Debugging: Hierarchie ausgeben
+	#set_focus_on_level(model)  # HIER LIEGT DAS PROBLEM MIT DEM TURNTABLE VERSATZ, WEIL DOPPELT BERECHNET WIRD
+	$turntable.calculate_whole_model_center(model_hierarchy)
+	selected_part = model
+	current_node = model
+	#print("- - - - - - - Model Hierarchy - - - - - - - ")  
+	#print_hierarchy(model_hierarchy)# Debugging: Hierarchie ausgeben
 
 # Generiert Trimesh-Collider für alle relevanten Meshes
 func generate_colliders(node: Node):
@@ -30,19 +34,30 @@ func generate_colliders(node: Node):
 	for child in node.get_children():
 		generate_colliders(child)
 
-# Rekursive Funktion zum Aufbau der Modellhierarchie
+# Rekursive Funktion zum Aufbau der Hierarchie nur mit MeshInstance3D
 func build_hierarchy(node: Node) -> Dictionary:
 	var hierarchy = {}
 	for child in node.get_children():
-		if child is MeshInstance3D or child.get_child_count() > 0:
+		if child is MeshInstance3D:
+			# Füge das MeshInstance3D zur Hierarchie hinzu
 			hierarchy[child] = build_hierarchy(child)
+		else:
+			# Suche weiter, falls kein MeshInstance3D
+			var sub_hierarchy = build_hierarchy(child)
+			# Füge alle gefundenen MeshInstances direkt in die aktuelle Hierarchie ein
+			for mesh_instance in sub_hierarchy.keys():
+				hierarchy[mesh_instance] = sub_hierarchy[mesh_instance]
 	return hierarchy
 
-# Debugging: Gibt die Hierarchie aus
-func print_hierarchy(hierarchy: Dictionary, level: int = 0):
+func print_hierarchy(hierarchy: Dictionary, prefix: String = ""):
 	for node in hierarchy.keys():
-		print("  ",level,"- ",str(node))
-		print_hierarchy(hierarchy[node], level + 1)
+		if node is MeshInstance3D:
+			print(prefix, "- MeshInstance3D:", node.name)
+		else:
+			print(prefix, "- Node:", node.name)
+		# Rekursiver Aufruf mit erweitertem Prefix für die Hierarchieebene
+		print_hierarchy(hierarchy[node], prefix + "  ")
+
 
 # Setzt den Fokus auf die aktuelle Ebene und aktualisiert die Transparenzw
 func set_focus_on_level(node: Node):
@@ -156,18 +171,18 @@ func _select_model_part():
 					selected_part = current_node
 					#print("exploding...")
 					$turntable.start_explosion(selected_part)
-					set_focus_on_level(selected_part)
-					print("!!! current_node: ", current_node)
+					set_focus_on_level(selected_part) #ENTHÄLT DOPPELTER AUFRUF FÜR CALCULATE CENTER, UNNÖTIG
 					#$turntable.set_focus_on_object(selected_part)
+					print("!!!1 current_node: ", current_node)
 				elif _is_direct_child(selected_part, current_node):
 					selected_part = current_node
 					$turntable.start_explosion(selected_part)
-					set_focus_on_level(selected_part)
+					set_focus_on_level(selected_part) #ENTHÄLT DOPPELTER AUFRUF FÜR CALCULATE CENTER, UNNÖTIG
 					#$turntable.set_focus_on_object(selected_part)
-					print("!!! current_node: ", current_node)
+					print("!!!2 current_node: ", current_node)
 				else:
 					enter_parent_level()
-					print("!!! current_node: ", current_node)
+					print("!!!3 current_node: ", current_node)
 				return
 			current_node = current_node.get_parent()
 			#print("!!! current_node: ", current_node)
