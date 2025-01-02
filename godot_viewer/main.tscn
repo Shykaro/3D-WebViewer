@@ -3,9 +3,9 @@
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
+[ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_bbds7"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
-[ext_resource type="PackedScene" uid="uid://hkpvqwjd13a8" path="res://model/alt_models/modelKr.glb" id="4_yd4i7"]
 [ext_resource type="Script" path="res://skripts/view_menu.gd" id="7_mct8y"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_u1gci"]
@@ -15,8 +15,7 @@ shader_parameter/vignette_radius = 0.2
 shader_parameter/vignette_softness = 0.5
 
 [sub_resource type="Environment" id="Environment_hg047"]
-background_mode = 1
-background_color = Color(0.724643, 0.724643, 0.724643, 1)
+background_color = Color(0, 0.625587, 0.651219, 1)
 ambient_light_source = 1
 reflected_light_source = 1
 
@@ -48,7 +47,7 @@ size = Vector2i(1280, 720)
 
 [node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
 
-[node name="modelKr" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_yd4i7")]
+[node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_bbds7")]
 
 [node name="camera_rig" type="Node3D" parent="."]
 script = ExtResource("3_p5mvp")
@@ -111,6 +110,7 @@ offset_bottom = -44.0
 [node name="WireFrame" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
 layout_mode = 2
 size_flags_vertical = 3
+disabled = true
 text = "show Wireframe"
 
 [node name="Normals" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
@@ -140,6 +140,11 @@ layout_mode = 2
 size_flags_vertical = 3
 text = "show Standard"
 
+[node name="Backgroundcolor" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "change Background"
+
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/BurgerButton" to="CanvasLayer/Hud/ViewMenu" method="_on_burger_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/WireFrame" to="CanvasLayer/Hud/ViewMenu" method="_on_wire_frame_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Normals" to="CanvasLayer/Hud/ViewMenu" method="_on_normals_pressed"]
@@ -147,3 +152,4 @@ text = "show Standard"
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Metallic" to="CanvasLayer/Hud/ViewMenu" method="_on_metallic_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/MatCap" to="CanvasLayer/Hud/ViewMenu" method="_on_mat_cap_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Shaded" to="CanvasLayer/Hud/ViewMenu" method="_on_shaded_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Backgroundcolor" to="CanvasLayer/Hud" method="_on_backgroundcolor_pressed"]

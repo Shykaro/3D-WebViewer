@@ -118,3 +118,7 @@ func reset_material_to_original(part: MeshInstance3D):
 			if material and material is BaseMaterial3D and material.albedo_color.a < 1.0:
 				material.set_transparency(BaseMaterial3D.TRANSPARENCY_ALPHA)
 				material.albedo_color.a = 0.2
+
+
+func _on_backgroundcolor_pressed() -> void:
+	pass # Replace with function body.

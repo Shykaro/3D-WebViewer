@@ -1,9 +1,10 @@
+###### NEW? Sphere working, but not the flyback
 extends Node3D
 
 @export var Scale = 2
 @export var Zoom_Multiplier = 0.35
 @export var transition_duration = 2.5
-@export var explosion_distance = 2.0
+@export var explosion_distance = 5.0
 @export var explosion_duration = 1.0
 
 @onready var model_container: Node3D = $VignetteSubViewport/model_container
@@ -71,14 +72,16 @@ func _process(delta):
 			var original_pos = mesh_original_positions[mesh]
 			var target_pos = mesh_explosion_targets[mesh]
 
-			# Bewegt jedes Mesh zurück zur ursprünglichen Position relativ zur Containerbewegung
-			mesh.transform.origin = target_pos.lerp(original_pos, t)
+			# Bewegt jedes Mesh zurück zur ursprünglichen Position relativ zur aktuellen Containerbewegung
+			var adjusted_original_pos = model_container.to_global(original_pos)
+			mesh.transform.origin = target_pos.lerp(adjusted_original_pos, t)
 
 		if t >= 1.0:
-			# Implosion beendet, Sichtbarkeit zurücksetzen
-			#$"..".reset_model_visibility()  # Korrekte Referenz auf `manager.gd`
+		# Implosion beendet
 			is_imploding = false
-			is_animation_active = false  # Entsperren nach Abschluss der Explosion
+			is_animation_active = false  # Entsperren nach Abschluss der Implosion
+
+
 
 # Hauptfunktion zur Berechnung des geometrischen Mittelpunkts THIS FINALLY WORKS JAAAAAAAAAAAAAAAAAAAAAAAA
 func calculate_whole_model_center(hierarchy: Dictionary):
@@ -106,7 +109,6 @@ func calculate_whole_model_center(hierarchy: Dictionary):
 # Rekursive Hilfsfunktion zum Sammeln der gewichteten Mittelpunkte
 func collect_weighted_mesh_centers(hierarchy: Dictionary, weighted_center: Vector3) -> float:
 	var total_volume = 0.0
-
 	for node in hierarchy:
 		# Berechnung des globalen AABB-Mittelpunkts
 		var global_transform = node.global_transform
@@ -132,7 +134,7 @@ func calculate_mesh_center(mesh_instance: MeshInstance3D) -> Vector3:
 		var global_transform = mesh_instance.global_transform
 		var aabb = mesh_instance.mesh.get_aabb()
 		var center = global_transform.origin + (global_transform.basis * aabb.get_center())
-		print("Calculated center for MeshInstance3D: ", mesh_instance.name, " -> ", center)
+		#print("Calculated center for MeshInstance3D: ", mesh_instance.name, " -> ", center)
 		return center
 	else:
 		print("Invalid MeshInstance3D or no mesh available")
@@ -144,39 +146,93 @@ func start_explosion(selected_part: MeshInstance3D):
 	is_animation_active = true
 	mesh_original_positions.clear()
 	mesh_explosion_targets.clear()
-	
-	# Setze den Mittelpunkt der Explosion auf das ausgewählte Teilmodell und berechne den `container_offset`.
+
+	# Hole die aktuelle Hierarchie
+	var current_hierarchy = $"..".model_hierarchy
+
+	# Setze den Mittelpunkt der Explosion auf das ausgewählte Teilmodell
 	var center_point = calculate_mesh_center(selected_part)
-	container_offset = model_container.to_local(center_point)
+	print("Starting explosion. Selected part: ", selected_part.name, " Center point: ", center_point)
+
 	var mesh_spheres = {}
 	is_in_explosion_view = true
 
-	# Schleife zur Einrichtung der Explosion
-	for child in model.get_child(0).get_children():
-		if child is MeshInstance3D and child != selected_part and !is_parent_of(selected_part, child):
-			# Richtung vom `center_point` zum `child`-Mesh in lokalen Koordinaten des Containers
-			var direction = (child.transform.origin - container_offset).normalized()
-			var total_distance = explosion_distance + calculate_bounding_sphere(child) * 0.1
-			var target_position = child.transform.origin + direction * total_distance
+	# Bestimme den Parent-Ast der aktuellen Hierarchie
+	var parent_branch = find_parent_branch(current_hierarchy, selected_part)
+	#print("Parent branch for explosion: ", parent_branch.keys())
+
+	# Füge die Explosion für alle Meshes ein, die nicht im Parent-Ast sind
+	for mesh in parent_branch.keys():
+		if mesh != selected_part:
+			var mesh_center = calculate_mesh_center(mesh)
+			var direction = (mesh_center - center_point).normalized()
+			var total_distance = explosion_distance + calculate_bounding_sphere(mesh) * 0.1
+			var target_position = mesh_center + direction * total_distance
 
 			# Speichern der relativen Start- und Zielpositionen
-			mesh_original_positions[child] = child.transform.origin
-			mesh_explosion_targets[child] = target_position
-			mesh_spheres[child] = calculate_bounding_sphere(child)
+			mesh_original_positions[mesh] = mesh.global_transform.origin
+			mesh_explosion_targets[mesh] = target_position
+			mesh_spheres[mesh] = calculate_bounding_sphere(mesh)
+
+			#print("Mesh: ", mesh.name, " Original position: ", mesh_center, 
+			#	  " Target position: ", target_position, " Direction: ", direction)
 
 	resolve_collisions(mesh_spheres)
 	explosion_elapsed = 0.0
 	is_exploding = true
+	#print("Explosion initialized. Mesh original positions: ", mesh_original_positions)
+	#print("Explosion initialized. Mesh target positions: ", mesh_explosion_targets)
 
 
-# Startet die Implosion und bewegt alle Meshes zurück zu ihrer ursprünglichen Position
+
+func calculate_bounding_sphere(mesh_instance: MeshInstance3D) -> float:
+	if not mesh_instance.mesh:
+		print("This isn't correct")
+		return 0.0
+	var aabb = mesh_instance.mesh.get_aabb()
+	return aabb.size.length() / 2.0
+
+# Prüft auf Kollisionen und passt Positionen an
+func resolve_collisions(mesh_spheres: Dictionary):
+	print("Resolving Collision...")
+	for mesh_a in mesh_spheres.keys():
+		for mesh_b in mesh_spheres.keys():
+			if mesh_a != mesh_b:
+				var distance = mesh_explosion_targets[mesh_a].distance_to(mesh_explosion_targets[mesh_b])
+				var min_distance = mesh_spheres[mesh_a] + mesh_spheres[mesh_b]
+				if distance < min_distance:
+					var push_direction = (mesh_explosion_targets[mesh_a] - mesh_explosion_targets[mesh_b]).normalized()
+					var push_amount = (min_distance - distance) / 2.0
+					mesh_explosion_targets[mesh_a] += push_direction * push_amount
+					mesh_explosion_targets[mesh_b] -= push_direction * push_amount
+
+
+# Sucht den Parent-Ast, der das ausgewählte Teilmodell enthält
+func find_parent_branch(hierarchy: Dictionary, selected_part: MeshInstance3D) -> Dictionary:
+	for mesh in hierarchy.keys():
+		if mesh == selected_part:
+			# Das aktuelle Mesh ist das ausgewählte, also zurückgeben
+			return hierarchy
+		elif hierarchy[mesh].size() > 0:
+			# Rekursiver Aufruf auf den Unterhierarchien
+			var result = find_parent_branch(hierarchy[mesh], selected_part)
+			if result.size() > 0:  # Prüfen, ob ein gültiges Dictionary zurückgegeben wurde
+				return result
+	return Dictionary()  # Rückgabe eines leeren Dictionaries statt null
+
 func start_implosion():
 	if is_animation_active:
-		return  # Verhindert das Starten einer neuen Implosion während einer Animation
+		#print("[DEBUG] Implosion already active. Skipping.")
+		return
+	#print("[DEBUG] Starting implosion.")
 	is_animation_active = true
 	explosion_elapsed = 0.0
 	is_imploding = true
 	is_in_explosion_view = false
+
+	#print("[DEBUG] Implosion original positions: ", mesh_original_positions)
+	#print("[DEBUG] Implosion target positions: ", mesh_explosion_targets)
+
 
 # Setzt den Fokus auf ein neues Submodell
 func set_focus_on_object(target_node: Node3D):
@@ -191,15 +247,15 @@ func set_focus_on_object(target_node: Node3D):
 		transition_elapsed = 0.0
 		is_transitioning = true
 
-# Zurücksetzen
-func reset_focus():
-	model_container.position = original_position
-	current_pivot = original_pivot
-
-func reset_focus_with_animation():
-	target_pivot = original_pivot
-	transition_elapsed = 0.0
-	is_transitioning = true
+## Zurücksetzen
+#func reset_focus():
+	#model_container.position = original_position
+	#current_pivot = original_pivot
+#
+#func reset_focus_with_animation():
+	#target_pivot = original_pivot
+	#transition_elapsed = 0.0
+	#is_transitioning = true
 
 # Berechnet die AABB und skaliert das Modell
 func setup_scaling_based_on_aabb(model_node: Node):
@@ -220,52 +276,34 @@ func calc_aabb_simple(n: Node) -> AABB:
 		aabb_ret = aabb_ret.merge(calc_aabb_simple(child))
 	return aabb_ret
 
-# Berechnet eine Bounding Sphere
-func calculate_bounding_sphere(mesh_instance: MeshInstance3D) -> float:
-	if not mesh_instance.mesh:
-		return 0.0
-	var aabb = mesh_instance.mesh.get_aabb()
-	return aabb.size.length() / 2.0
 
-# Prüft, ob parent_node ein Vorfahre von child_node ist
-func is_parent_of(parent_node: Node, child_node: Node) -> bool:
-	var current_node = child_node
-	while current_node:
-		if current_node == parent_node:
-			return true
-		current_node = current_node.get_parent()
-	return false
-
-# Prüft auf Kollisionen und passt Positionen an
-func resolve_collisions(mesh_spheres: Dictionary):
-	for mesh_a in mesh_spheres.keys():
-		for mesh_b in mesh_spheres.keys():
-			if mesh_a != mesh_b:
-				var distance = mesh_explosion_targets[mesh_a].distance_to(mesh_explosion_targets[mesh_b])
-				var min_distance = mesh_spheres[mesh_a] + mesh_spheres[mesh_b]
-				if distance < min_distance:
-					var push_direction = (mesh_explosion_targets[mesh_a] - mesh_explosion_targets[mesh_b]).normalized()
-					var push_amount = (min_distance - distance) / 2.0
-					mesh_explosion_targets[mesh_a] += push_direction * push_amount
-					mesh_explosion_targets[mesh_b] -= push_direction * push_amount
-
-# Berechnet die maximale Breite eines Mesh-Objekts basierend auf den Vertex-Positionen
-func calculate_max_width_from_vertices(mesh_instance: MeshInstance3D) -> float:
-	if not mesh_instance.mesh:
-		return 0.0
-	var vertices = []
-	for i in range(mesh_instance.mesh.get_surface_count()):
-		var array = mesh_instance.mesh.surface_get_arrays(i)
-		if array.size() > Mesh.ARRAY_VERTEX:
-			var surface_vertices = array[Mesh.ARRAY_VERTEX]
-			for vertex in surface_vertices:
-				vertices.append(mesh_instance.transform.origin + mesh_instance.transform.basis * vertex)
-
-	var min_point = vertices[0]
-	var max_point = vertices[0]
-	for vertex in vertices:
-		min_point = min_point.min(vertex)
-		max_point = max_point.max(vertex)
-
-	var size = max_point - min_point
-	return size.length()
+## Prüft, ob parent_node ein Vorfahre von child_node ist
+#func is_parent_of(parent_node: Node, child_node: Node) -> bool:
+	#var current_node = child_node
+	#while current_node:
+		#if current_node == parent_node:
+			#return true
+		#current_node = current_node.get_parent()
+	#return false
+#
+#
+## Berechnet die maximale Breite eines Mesh-Objekts basierend auf den Vertex-Positionen
+#func calculate_max_width_from_vertices(mesh_instance: MeshInstance3D) -> float:
+	#if not mesh_instance.mesh:
+		#return 0.0
+	#var vertices = []
+	#for i in range(mesh_instance.mesh.get_surface_count()):
+		#var array = mesh_instance.mesh.surface_get_arrays(i)
+		#if array.size() > Mesh.ARRAY_VERTEX:
+			#var surface_vertices = array[Mesh.ARRAY_VERTEX]
+			#for vertex in surface_vertices:
+				#vertices.append(mesh_instance.transform.origin + mesh_instance.transform.basis * vertex)
+#
+	#var min_point = vertices[0]
+	#var max_point = vertices[0]
+	#for vertex in vertices:
+		#min_point = min_point.min(vertex)
+		#max_point = max_point.max(vertex)
+#
+	#var size = max_point - min_point
+	#return size.length()
