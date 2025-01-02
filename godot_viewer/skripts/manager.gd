@@ -58,6 +58,48 @@ func print_hierarchy(hierarchy: Dictionary, prefix: String = ""):
 		# Rekursiver Aufruf mit erweitertem Prefix für die Hierarchieebene
 		print_hierarchy(hierarchy[node], prefix + "  ")
 
+func _input(event):
+	if view_menu.menu_open:
+		return
+
+	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT and !$turntable.is_transitioning:
+		var current_time = Time.get_ticks_msec() / 1000.0
+		if current_time - last_click_time <= double_click_time:
+			#print("[DEBUG] Double-click detected.")
+			_select_model_part()
+		last_click_time = current_time
+
+func _select_model_part():
+	var from = camera.project_ray_origin(get_viewport().get_mouse_position())
+	var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * selection_distance
+
+	var ray_query = PhysicsRayQueryParameters3D.new()
+	ray_query.from = from
+	ray_query.to = to
+
+	var result = get_world_3d().direct_space_state.intersect_ray(ray_query)
+
+	if result and result.collider:
+		current_node = result.collider
+		while current_node:
+			if current_node is MeshInstance3D:
+				if selected_part == model:
+					#print("[DEBUG] Initial explosion setup.")
+					$turntable.start_explosion(current_node)
+					set_focus_on_level(current_node) #CONSIDERED NOCH NICHT NUR DEN PARENT ZU FOKUSSIEREN !!!!!!!!!!!!!!!!!!
+				elif _is_direct_child(selected_part, current_node):
+					#print("[DEBUG] Sub-level explosion setup.")
+					$turntable.start_explosion(current_node)
+					set_focus_on_level(current_node)
+				else:
+					#print("[DEBUG] Navigating to parent level.")
+					enter_parent_level()
+				return
+			current_node = current_node.get_parent()
+
+	if selected_part != null:
+		print("[DEBUG] No selection detected, navigating to parent level.")
+		enter_parent_level()
 
 func set_focus_on_level(node: Node):
 	print("[DEBUG] Setting focus on level: ", node.name)
@@ -73,9 +115,7 @@ func set_focus_on_level(node: Node):
 
 	update_transparency_for_current_view(node)
 	$turntable.set_focus_on_object(node)
-	print("[DEBUG] Focus set on: ", node.name, " Current level: ", current_level)
-
-	
+	#print("[DEBUG] Focus set on: ", node.name, " Current level: ", current_level)
 
 # Aktualisiert die Transparenz basierend auf der aktuellen Ebene
 func update_transparency_for_current_view(except_node: Node = null):
@@ -97,11 +137,11 @@ func make_part_transparent(part: MeshInstance3D):
 					material.albedo_color.a = 0.2
 					part.set_surface_override_material(i, material)
 
-func enter_sub_level(node: MeshInstance3D):
-	if model_hierarchy.has(node):
-		print("[DEBUG] Entering sub-level for: ", node.name)
-		set_focus_on_level(node)  # Zuerst Fokus setzen
-		$turntable.start_explosion(node)  # Danach Explosion starten
+#func enter_sub_level(node: MeshInstance3D):
+	#if model_hierarchy.has(node):
+		##print("[DEBUG] Entering sub-level for: ", node.name)
+		#set_focus_on_level(node)  # Zuerst Fokus setzen
+		#$turntable.start_explosion(node)  # Danach Explosion starten
 
 func enter_parent_level():
 	var current_node = selected_part
@@ -111,12 +151,12 @@ func enter_parent_level():
 
 	var mesh_parent = search_for_mesh_parent(current_node)
 	if mesh_parent:
-		print("[DEBUG] Moving to parent level: ", mesh_parent.name)
+		#print("[DEBUG] Moving to parent level: ", mesh_parent.name)
 		set_focus_on_level(mesh_parent)  # Zuerst Fokus setzen
 		$turntable.start_implosion()  # Danach Implosion starten
 	else:
-		print("[DEBUG] Already at root level.")
-
+		#print("[DEBUG] Already at root level.")
+		pass
 
 # Rekursive Suche nach dem nächsten MeshInstance3D-Parent
 func search_for_mesh_parent(node: Node) -> Node:
@@ -129,51 +169,6 @@ func search_for_mesh_parent(node: Node) -> Node:
 		return parent
 	# Andernfalls, suche weiter rekursiv nach oben
 	return search_for_mesh_parent(parent)	
-
-func _input(event):
-	if view_menu.menu_open:
-		return
-
-	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT and !$turntable.is_transitioning:
-		var current_time = Time.get_ticks_msec() / 1000.0
-		if current_time - last_click_time <= double_click_time:
-			print("[DEBUG] Double-click detected.")
-			_select_model_part()
-		last_click_time = current_time
-
-func _select_model_part():
-	var from = camera.project_ray_origin(get_viewport().get_mouse_position())
-	var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * selection_distance
-
-	var ray_query = PhysicsRayQueryParameters3D.new()
-	ray_query.from = from
-	ray_query.to = to
-
-	var result = get_world_3d().direct_space_state.intersect_ray(ray_query)
-
-	if result and result.collider:
-		current_node = result.collider
-		while current_node:
-			if current_node is MeshInstance3D:
-				if selected_part == model:
-					print("[DEBUG] Initial explosion setup.")
-					$turntable.start_explosion(current_node)
-					set_focus_on_level(current_node)
-				elif _is_direct_child(selected_part, current_node):
-					print("[DEBUG] Sub-level explosion setup.")
-					$turntable.start_explosion(current_node)
-					set_focus_on_level(current_node)
-				else:
-					print("[DEBUG] Navigating to parent level.")
-					enter_parent_level()
-				return
-			current_node = current_node.get_parent()
-
-	if selected_part != null:
-		print("[DEBUG] No selection detected, navigating to parent level.")
-		enter_parent_level()
-
-
 
 # Überprüfen, ob current_node ein direktes Child von parent_node ist
 func _is_direct_child(parent_node: Node, current_node: Node) -> bool:
