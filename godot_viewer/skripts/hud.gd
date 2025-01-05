@@ -15,10 +15,10 @@ func change_camera_background_color(color: Color):
 	# Camera nach environment Source checken
 	if camera.environment == null:
 		camera.environment = Environment.new()
-		print("Created new environment")
+		#print("Created new environment")
 	camera.environment.background_mode = Environment.BG_COLOR
 	camera.environment.background_color = color  # Setze die Hintergrundfarbe
-	print("Color: ", color)
+	#print("Color: ", color)
 	return
 
 

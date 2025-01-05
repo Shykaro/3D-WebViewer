@@ -21,9 +21,9 @@ func _ready():
 
 	# Gesamtabmessungen des Modells berechnen
 	var global_aabb = calculate_global_aabb(model_container.get_child(0))
-	print("Global AABB: ", global_aabb)
+	#print("Global AABB: ", global_aabb)
 	var dimensions = global_aabb.size
-	print("Model dimensions (Width, Height, Depth): ", dimensions)
+	#print("Model dimensions (Width, Height, Depth): ", dimensions)
 
 	# Kamerawerte berechnen
 	var fov = deg_to_rad($camera_arm/camera.fov)
@@ -83,7 +83,7 @@ func calculate_global_aabb(node: Node) -> AABB:
 # Berechnet die Dimensionen (Breite, Höhe, Tiefe) des gesamten Modells
 func calculate_model_dimensions(model_node: Node) -> Vector3:
 	var aabb = turntable.calc_aabb_simple(model_node)
-	print("Calculated model dimensions (Width, Height, Depth): ", aabb.size)
+	#print("Calculated model dimensions (Width, Height, Depth): ", aabb.size)
 	return aabb.size
 
 # Hauptfunktion zur Berechnung der AABB

@@ -81,25 +81,89 @@ func _select_model_part():
 
 	if result and result.collider:
 		current_node = result.collider
-		while current_node:
-			if current_node is MeshInstance3D:
-				if selected_part == model:
-					#print("[DEBUG] Initial explosion setup.")
-					$turntable.start_explosion(current_node)
-					set_focus_on_level(current_node) #CONSIDERED NOCH NICHT NUR DEN PARENT ZU FOKUSSIEREN !!!!!!!!!!!!!!!!!!
-				elif _is_direct_child(selected_part, current_node):
-					#print("[DEBUG] Sub-level explosion setup.")
-					$turntable.start_explosion(current_node)
-					set_focus_on_level(current_node)
-				else:
-					#print("[DEBUG] Navigating to parent level.")
-					enter_parent_level()
-				return
-			current_node = current_node.get_parent()
 
+	while current_node:
+		#print("current_node: ", current_node)
+		if current_node is MeshInstance3D:
+			
+			var clicked_mesh = current_node
+
+			if selected_part == model:
+				
+				# -> Wir sind auf Ober-Ebene
+				var top_parent = find_top_level_key_including(model_hierarchy, clicked_mesh)
+				
+				if top_parent != null:
+					$turntable.start_explosion(top_parent)
+					set_focus_on_level(top_parent)  # => "tiefer" gehen in Ast
+					#print("Lolol")
+				else:
+					# Klick auf etwas, was nicht existiert => z. B. do nothing oder parent?
+					print("Kein passender top-level parent gefunden.")
+				return
+			else:
+				# Wir sind auf Mesh-Ebene
+				# => subtree = model_hierarchy[selected_part]
+				var subtree = model_hierarchy.get(selected_part, null)
+				if subtree == null:
+					# fallback => wir haben keinen subtree => maybe do parent
+					enter_parent_level()
+					#print("Ich sollte nicht passieren")
+					return
+
+				# => finde dictionary-parent
+				var parent_branch = find_parent_branch(subtree, clicked_mesh)
+				if parent_branch != null:
+					$turntable.start_explosion(parent_branch)
+					set_focus_on_level(parent_branch)
+				else:
+					# => evtl. "enter_sub_level()" oder "enter_parent_level()" 
+					print("Kein Parentbranch gefunden, fallback.")
+					enter_parent_level()
+				
+				return
+		current_node = current_node.get_parent()
+		#print("Ich sollte nicht passieren")
+	# Falls wir gar keinen Mesh gefunden haben:
 	if selected_part != null:
-		print("[DEBUG] No selection detected, navigating to parent level.")
+		print("Ich sollte nicht passieren")
 		enter_parent_level()
+
+
+func find_top_level_key_including(hierarchy: Dictionary, mesh: MeshInstance3D) -> MeshInstance3D:
+	for top_mesh in hierarchy.keys():
+		if top_mesh == mesh:
+			# Mesh ist selber Top-Level
+			return top_mesh
+		else:
+			if find_in_subtree(hierarchy[top_mesh], mesh):
+				return top_mesh
+	return null
+
+# Hilfsfunktion: Prüft, ob 'mesh' im Dictionary 'subtree' enthalten ist.
+func find_in_subtree(subtree: Dictionary, mesh: MeshInstance3D) -> bool:
+	for child in subtree.keys():
+		if child == mesh:
+			return true
+		else:
+			if find_in_subtree(subtree[child], mesh):
+				return true
+	return false
+
+
+func find_parent_branch(subtree: Dictionary, mesh: MeshInstance3D) -> MeshInstance3D:
+	for child_mesh in subtree.keys():
+		if child_mesh == mesh:
+			return null
+		else:
+			if mesh in subtree[child_mesh].keys():
+				# => child_mesh ist direkter Parent
+				return child_mesh
+			else:
+				var found = find_parent_branch(subtree[child_mesh], mesh)
+				if found != null:
+					return found
+	return null
 
 func set_focus_on_level(node: Node):
 	print("[DEBUG] Setting focus on level: ", node.name)
@@ -115,7 +179,6 @@ func set_focus_on_level(node: Node):
 
 	update_transparency_for_current_view(node)
 	$turntable.set_focus_on_object(node)
-	#print("[DEBUG] Focus set on: ", node.name, " Current level: ", current_level)
 
 # Aktualisiert die Transparenz basierend auf der aktuellen Ebene
 func update_transparency_for_current_view(except_node: Node = null):
@@ -136,12 +199,6 @@ func make_part_transparent(part: MeshInstance3D):
 				if material is BaseMaterial3D:
 					material.albedo_color.a = 0.2
 					part.set_surface_override_material(i, material)
-
-#func enter_sub_level(node: MeshInstance3D):
-	#if model_hierarchy.has(node):
-		##print("[DEBUG] Entering sub-level for: ", node.name)
-		#set_focus_on_level(node)  # Zuerst Fokus setzen
-		#$turntable.start_explosion(node)  # Danach Explosion starten
 
 func enter_parent_level():
 	var current_node = selected_part
