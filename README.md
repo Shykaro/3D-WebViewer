@@ -1,2 +1,3 @@
-# FreeDee
-Repo template to automatically generate browsable 3D contents from uploaded blender files
+3D-Webviewer
+
+For university course contexts
