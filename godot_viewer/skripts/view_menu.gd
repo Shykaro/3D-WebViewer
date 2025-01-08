@@ -11,8 +11,8 @@ extends Node
 @onready var main: Node3D = $"../../.."
 
 # Referenzen für Popup-Menü und Button
-@onready var menu_button: TextureButton = $BurgerButton
-@onready var popup_menu = $PopupMenu
+@onready var menu_button: TextureButton = $HBoxContainer/BurgerButton
+@onready var popup_menu = $HBoxContainer/PopupMenu
 
 # Originalmaterialien speichern
 var original_materials = {}
