@@ -1,6 +1,5 @@
-[gd_scene load_steps=3 format=3 uid="uid://cnx4n6unxh68o"]
+[gd_scene load_steps=2 format=3 uid="uid://cnx4n6unxh68o"]
 
-[ext_resource type="Texture2D" uid="uid://c2ipurv22hd4a" path="res://Hochschule_Furtwangen_logo.svg" id="1_lfo5e"]
 [ext_resource type="Script" path="res://skripts/hud.gd" id="1_yyrs7"]
 
 [node name="Hud" type="Control"]
@@ -11,12 +10,3 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_yyrs7")
-
-[node name="TextureRect" type="TextureRect" parent="."]
-layout_mode = 1
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 1444.0
-offset_bottom = 619.0
-scale = Vector2(0.185, 0.185)
-texture = ExtResource("1_lfo5e")

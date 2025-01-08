@@ -16,6 +16,11 @@ var last_click_time = 0
 
 var current_node
 
+var EV_active = true
+
+var hovered_mesh: MeshInstance3D = null
+var original_materials = {}
+
 func _ready():
 	generate_colliders(model)  # Erstelle Collider für das Modell
 	model_hierarchy = build_hierarchy(model)  # Baue die Modellhierarchie
@@ -25,6 +30,60 @@ func _ready():
 	current_node = model
 	#print("- - - - - - - Model Hierarchy - - - - - - - ")  
 	#print_hierarchy(model_hierarchy)# Debugging: Hierarchie ausgeben
+
+func _process(delta):
+	if EV_active:
+		var from = camera.project_ray_origin(get_viewport().get_mouse_position())
+		var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * selection_distance
+
+		var ray_query = PhysicsRayQueryParameters3D.new()
+		ray_query.from = from
+		ray_query.to = to
+
+		var result = get_world_3d().direct_space_state.intersect_ray(ray_query)
+
+		# 1) Finde das Objekt, falls eines gehittet wird
+		var new_hovered = null
+		if result and result.collider:
+			if result.collider.get_parent() is MeshInstance3D: #geht leider davon aus dass Godot immer StaticMesh als Child an Meshinstance wirft
+				new_hovered = result.collider.get_parent()
+
+		# 2) Wenn das hovered Objekt sich ändert
+		if new_hovered != hovered_mesh:
+			# Entferne Highlight vom alten
+			if hovered_mesh:
+				restore_original_material(hovered_mesh)
+
+		# Setze Highlight beim neuen
+			if new_hovered:
+				apply_highlight(new_hovered)
+		
+			hovered_mesh = new_hovered
+
+func apply_highlight(mesh: MeshInstance3D):
+	if not mesh.mesh:
+		return
+	# Speichere Originalmaterialien
+	var surfaces = mesh.mesh.get_surface_count()
+	original_materials[mesh] = []
+	for i in range(surfaces):
+		var mat = mesh.mesh.surface_get_material(i)
+		original_materials[mesh].append(mat)
+		if mat:
+			var highlight_mat = mat.duplicate()
+			if highlight_mat is BaseMaterial3D:
+				highlight_mat.emission_enabled = true
+				highlight_mat.emission = Color.YELLOW
+				highlight_mat.emission_energy = 2.0
+			mesh.set_surface_override_material(i, highlight_mat)
+
+func restore_original_material(mesh: MeshInstance3D):
+	if mesh not in original_materials:
+		return
+	var surfaces = mesh.mesh.get_surface_count()
+	for i in range(surfaces):
+		mesh.set_surface_override_material(i, null)
+	original_materials.erase(mesh)
 
 # Generiert Trimesh-Collider für alle relevanten Meshes
 func generate_colliders(node: Node):
@@ -59,15 +118,16 @@ func print_hierarchy(hierarchy: Dictionary, prefix: String = ""):
 		print_hierarchy(hierarchy[node], prefix + "  ")
 
 func _input(event):
-	if view_menu.menu_open:
-		return
+	#if view_menu.menu_open:
+		#return
 
 	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT and !$turntable.is_transitioning:
-		var current_time = Time.get_ticks_msec() / 1000.0
-		if current_time - last_click_time <= double_click_time:
-			#print("[DEBUG] Double-click detected.")
-			_select_model_part()
-		last_click_time = current_time
+		if EV_active:
+			var current_time = Time.get_ticks_msec() / 1000.0
+			if current_time - last_click_time <= double_click_time:
+				#print("[DEBUG] Double-click detected.")
+				_select_model_part()
+			last_click_time = current_time
 
 func _select_model_part():
 	var from = camera.project_ray_origin(get_viewport().get_mouse_position())

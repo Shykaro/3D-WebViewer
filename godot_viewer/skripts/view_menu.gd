@@ -8,10 +8,11 @@ extends Node
 @export var matcap_material: Resource = preload("res://materials/MatCapMaterial.tres")
 @export var active_material: Resource
 @onready var model_container: Node3D = $"../../../turntable/VignetteSubViewport/model_container"
+@onready var main: Node3D = $"../../.."
 
 # Referenzen für Popup-Menü und Button
 @onready var menu_button: TextureButton = $BurgerButton
-@onready var popup_menu: VBoxContainer = $PopupMenu
+@onready var popup_menu = $PopupMenu
 
 # Originalmaterialien speichern
 var original_materials = {}
@@ -67,6 +68,16 @@ func _on_shaded_pressed():
 	_update_menu_visibility()
 	
 
+func _on_ev_active_pressed():
+	if main.EV_active == true:
+		main.EV_active = false
+		#Hier noch case einbauen, für den Fall dass der Button verwendet wird während man in der EV ist
+		#main.selected_part = main.model
+		#main.current_node = main.model
+		#main.set_focus_on_level(main.model)  # HIER LIEGT DAS PROBLEM MIT DEM TURNTABLE VERSATZ, WEIL DOPPELT BERECHNET WIRD
+	else:
+		main.EV_active = true
+	pass # Replace with function body.
 
 
 # Speichert die Originalmaterialien des Modells
@@ -107,7 +118,7 @@ func _find_all_meshes_in_node(node: Node) -> Array:
 		elif child.get_child_count() > 0:
 			meshes.append_array(_find_all_meshes_in_node(child))
 	return meshes
-	
+
 func reset_material_to_original(part: MeshInstance3D):
 	if part in original_materials:
 		var surfaces = original_materials[part]
@@ -118,7 +129,3 @@ func reset_material_to_original(part: MeshInstance3D):
 			if material and material is BaseMaterial3D and material.albedo_color.a < 1.0:
 				material.set_transparency(BaseMaterial3D.TRANSPARENCY_ALPHA)
 				material.albedo_color.a = 0.2
-
-
-func _on_backgroundcolor_pressed() -> void:
-	pass # Replace with function body.

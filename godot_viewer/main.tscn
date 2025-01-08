@@ -1,12 +1,14 @@
-[gd_scene load_steps=13 format=3 uid="uid://gynpel7qpjrr"]
+[gd_scene load_steps=15 format=3 uid="uid://gynpel7qpjrr"]
 
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
-[ext_resource type="PackedScene" uid="uid://c0g28tm11djak" path="res://model/alt_models/modelU.glb" id="4_a7q3i"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
+[ext_resource type="PackedScene" uid="uid://b485wc6ufwbt1" path="res://model/alt_models/ModelA.glb" id="4_uapyc"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
 [ext_resource type="Script" path="res://skripts/view_menu.gd" id="7_mct8y"]
+[ext_resource type="Texture2D" uid="uid://c2ipurv22hd4a" path="res://Hochschule_Furtwangen_logo.svg" id="8_n0juw"]
+[ext_resource type="StyleBox" uid="uid://boswm60dl5kfb" path="res://styles/BoxStyle.tres" id="9_4jfkl"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_u1gci"]
 shader = ExtResource("4_o7hb1")
@@ -47,7 +49,7 @@ size = Vector2i(1280, 720)
 
 [node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
 
-[node name="modelU" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_a7q3i")]
+[node name="ModelA" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_uapyc")]
 
 [node name="camera_rig" type="Node3D" parent="."]
 script = ExtResource("3_p5mvp")
@@ -99,57 +101,213 @@ texture_normal = SubResource("CompressedTexture2D_yh3cv")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="PopupMenu" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu"]
+[node name="PopupMenu" type="Control" parent="CanvasLayer/Hud/ViewMenu"]
 material = SubResource("ShaderMaterial_kqsm8")
-layout_mode = 0
-offset_left = -124.0
-offset_top = -306.0
-offset_right = 48.0
-offset_bottom = -44.0
+layout_direction = 2
+layout_mode = 1
+anchor_left = -2.704
+anchor_top = -17.154
+anchor_right = 1.241
+anchor_bottom = 1.0
+offset_left = 0.0160065
+offset_top = 0.00604248
+offset_right = -0.0139999
+offset_bottom = 12.0
+grow_horizontal = 0
+grow_vertical = 2
 
-[node name="WireFrame" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+[node name="Panel" type="Panel" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("9_4jfkl")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Material Options:"
+fit_content = true
+
+[node name="GridContainer" type="GridContainer" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 20
+
+[node name="WireFrame" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
 disabled = true
+keep_pressed_outside = true
 text = "show Wireframe"
 
-[node name="Normals" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+[node name="Normals" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 6
 disabled = true
+keep_pressed_outside = true
 text = "show Normals"
 
-[node name="UvGrid" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+[node name="UvGrid" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 6
+keep_pressed_outside = true
 text = "show UVs
 "
 
-[node name="Metallic" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+[node name="Metallic" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 6
+keep_pressed_outside = true
 text = "show Metallic"
 
-[node name="MatCap" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+[node name="MatCap" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 6
+keep_pressed_outside = true
 text = "show MatCap"
 
-[node name="Shaded" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+[node name="Shaded" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 6
+keep_pressed_outside = true
 text = "show Standard"
 
-[node name="Backgroundcolor" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu"]
+[node name="MarginContainer2" type="MarginContainer" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_horizontal = 0
+size_flags_vertical = 6
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/MarginContainer2"]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+text = "Scene Options:"
+fit_content = true
+
+[node name="GridContainer" type="GridContainer" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/v_separation = 20
+
+[node name="Backgroundcolor" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_vertical = 6
 text = "change Background"
 
+[node name="EvActive" type="Button" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+keep_pressed_outside = true
+text = "Disable Explosion View"
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer"]
+layout_direction = 2
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/MarginContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 10
+texture = ExtResource("8_n0juw")
+expand_mode = 5
+
+[node name="InfoPanel" type="Panel" parent="CanvasLayer/Hud"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -116.0
+offset_right = 276.0
+offset_bottom = -20.0
+grow_vertical = 0
+
+[node name="Panel" type="Panel" parent="CanvasLayer/Hud/InfoPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("9_4jfkl")
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Hud/InfoPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Hud/InfoPanel/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Hud/InfoPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VSplitContainer" type="VSplitContainer" parent="CanvasLayer/Hud/InfoPanel/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hud/InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer"]
+layout_mode = 2
+text = "Icosphere_003"
+fit_content = true
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="CanvasLayer/Hud/InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer"]
+layout_mode = 2
+text = "Vertices 3000000"
+fit_content = true
+
 [connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/BurgerButton" to="CanvasLayer/Hud/ViewMenu" method="_on_burger_button_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/WireFrame" to="CanvasLayer/Hud/ViewMenu" method="_on_wire_frame_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Normals" to="CanvasLayer/Hud/ViewMenu" method="_on_normals_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/UvGrid" to="CanvasLayer/Hud/ViewMenu" method="_on_uv_grid_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Metallic" to="CanvasLayer/Hud/ViewMenu" method="_on_metallic_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/MatCap" to="CanvasLayer/Hud/ViewMenu" method="_on_mat_cap_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Shaded" to="CanvasLayer/Hud/ViewMenu" method="_on_shaded_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/Backgroundcolor" to="CanvasLayer/Hud" method="_on_backgroundcolor_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/WireFrame" to="CanvasLayer/Hud/ViewMenu" method="_on_wire_frame_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Normals" to="CanvasLayer/Hud/ViewMenu" method="_on_normals_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/UvGrid" to="CanvasLayer/Hud/ViewMenu" method="_on_uv_grid_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Metallic" to="CanvasLayer/Hud/ViewMenu" method="_on_metallic_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/MatCap" to="CanvasLayer/Hud/ViewMenu" method="_on_mat_cap_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Shaded" to="CanvasLayer/Hud/ViewMenu" method="_on_shaded_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/Backgroundcolor" to="CanvasLayer/Hud" method="_on_backgroundcolor_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/EvActive" to="CanvasLayer/Hud/ViewMenu" method="_on_ev_active_pressed"]
