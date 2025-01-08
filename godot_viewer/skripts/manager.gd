@@ -17,6 +17,8 @@ var last_click_time = 0
 var current_node
 
 var EV_active = true
+@export var highlight_material: Resource = preload("res://materials/highlight_material.tres")
+
 
 var hovered_mesh: MeshInstance3D = null
 var original_materials = {}
@@ -32,50 +34,64 @@ func _ready():
 	#print_hierarchy(model_hierarchy)# Debugging: Hierarchie ausgeben
 
 func _process(delta):
-	if EV_active:
-		var from = camera.project_ray_origin(get_viewport().get_mouse_position())
-		var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * selection_distance
+	var mouse_vel = Input.get_last_mouse_velocity()
+	if mouse_vel.length() > 0:
+		if EV_active:
+			var from = camera.project_ray_origin(get_viewport().get_mouse_position())
+			var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * selection_distance
 
-		var ray_query = PhysicsRayQueryParameters3D.new()
-		ray_query.from = from
-		ray_query.to = to
+			var ray_query = PhysicsRayQueryParameters3D.new()
+			ray_query.from = from
+			ray_query.to = to
 
-		var result = get_world_3d().direct_space_state.intersect_ray(ray_query)
+			var result = get_world_3d().direct_space_state.intersect_ray(ray_query)
 
-		# 1) Finde das Objekt, falls eines gehittet wird
-		var new_hovered = null
-		if result and result.collider:
-			if result.collider.get_parent() is MeshInstance3D: #geht leider davon aus dass Godot immer StaticMesh als Child an Meshinstance wirft
-				new_hovered = result.collider.get_parent()
+			# 1) Finde das Objekt, falls eines gehittet wird
+			var new_hovered = null
+			if result and result.collider:
+				if result.collider.get_parent() is MeshInstance3D: #geht leider davon aus dass Godot immer StaticMesh als Child an Meshinstance wirft
+					new_hovered = result.collider.get_parent()
 
-		# 2) Wenn das hovered Objekt sich ändert
-		if new_hovered != hovered_mesh:
-			# Entferne Highlight vom alten
-			if hovered_mesh:
-				restore_original_material(hovered_mesh)
+			# 2) Wenn das hovered Objekt sich ändert
+			if new_hovered != hovered_mesh:
+				# Entferne Highlight vom alten
+				if hovered_mesh:
+					remove_highlight(hovered_mesh)
 
-		# Setze Highlight beim neuen
-			if new_hovered:
-				apply_highlight(new_hovered)
-		
+				# Setze Highlight beim neuen
+				if new_hovered:
+					apply_highlight(new_hovered)
+
 			hovered_mesh = new_hovered
 
 func apply_highlight(mesh: MeshInstance3D):
-	if not mesh.mesh:
-		return
-	# Speichere Originalmaterialien
 	var surfaces = mesh.mesh.get_surface_count()
-	original_materials[mesh] = []
 	for i in range(surfaces):
-		var mat = mesh.mesh.surface_get_material(i)
-		original_materials[mesh].append(mat)
-		if mat:
-			var highlight_mat = mat.duplicate()
-			if highlight_mat is BaseMaterial3D:
-				highlight_mat.emission_enabled = true
-				highlight_mat.emission = Color.YELLOW
-				highlight_mat.emission_energy = 2.0
-			mesh.set_surface_override_material(i, highlight_mat)
+		# Überschreibe Material mit EINEM globalen highlight_material
+		mesh.set_surface_override_material(i, highlight_material)
+
+func remove_highlight(mesh: MeshInstance3D):
+	var surfaces = mesh.mesh.get_surface_count()
+	for i in range(surfaces):
+		# Entferne Override => Originalmaterial kommt zurück
+		mesh.set_surface_override_material(i, null)
+
+#func apply_highlight(mesh: MeshInstance3D):
+	#if not mesh.mesh:
+		#return
+	## Speichere Originalmaterialien
+	#var surfaces = mesh.mesh.get_surface_count()
+	#original_materials[mesh] = []
+	#for i in range(surfaces):
+		#var mat = mesh.mesh.surface_get_material(i)
+		#original_materials[mesh].append(mat)
+		#if mat:
+			#var highlight_mat = mat.duplicate()
+			#if highlight_mat is BaseMaterial3D:
+				#highlight_mat.emission_enabled = true
+				#highlight_mat.emission = Color.YELLOW
+				#highlight_mat.emission_energy = 2.0
+			#mesh.set_surface_override_material(i, highlight_mat)
 
 func restore_original_material(mesh: MeshInstance3D):
 	if mesh not in original_materials:
