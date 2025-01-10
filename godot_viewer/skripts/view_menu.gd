@@ -1,84 +1,120 @@
-extends Node
+extends Control
 
-# Materialien für die verschiedenen Ansichten
+# --- Material-Resourcen ---
 @export var wireframe_material: Resource = preload("res://materials/WireframeMaterial.tres")
 @export var textured_material: Resource = preload("res://materials/UVGridTexture.tres")
 @export var normals_material: Resource = preload("res://materials/NormalsMaterial.tres")
 @export var metallic_material: Resource = preload("res://materials/MetallicMaterial.tres")
 @export var matcap_material: Resource = preload("res://materials/MatCapMaterial.tres")
 @export var active_material: Resource
+
 @onready var model_container: Node3D = $"../../../turntable/VignetteSubViewport/model_container"
 @onready var main: Node3D = $"../../.."
 
-# Referenzen für Popup-Menü und Button
-@onready var menu_button: TextureButton = $HBoxContainer/BurgerButton
-@onready var popup_menu = $HBoxContainer/PopupMenu
+@export var panel_width = 300
+@export var animation_time = 0.3
+var is_expanded = false
+var tween
 
-# Originalmaterialien speichern
+@onready var side_container: Control = $HBoxContainer
+@onready var menu_button: TextureButton = $HBoxContainer/Panel/MarginContainer/BurgerButton
+@onready var popup_menu: Control = $HBoxContainer/PopupMenu
+
+var side_container_OG_position
+
+@export var menu_open = false
+
 var original_materials = {}
-@export var menu_open = false  # Status des Menüs
 
 func _ready():
-	_save_original_materials()  # Speichert die Originalmaterialien des Modells
-	_update_menu_visibility()  # Menü initial ausblenden
-	
+	_save_original_materials()
+	side_container_OG_position = side_container.position.x 
+	side_container.position.x = side_container.position.x + popup_menu.size.x
+	is_expanded = false
 
-# Blockiere Eingaben, während Menü interagiert wird
+
+# -------------------------------------------------------------------------
+# AUSKLAPP- / EINKLAPP-LOGIK
+# -------------------------------------------------------------------------
+
 func _on_burger_button_pressed():
-	menu_open = not menu_open
-	_update_menu_visibility()
+	print("Burger Button Pressed!")
+	is_expanded = not is_expanded
+	animate_container(is_expanded)
 
-# Aktualisiert die Sichtbarkeit des Popup-Menüs basierend auf `menu_open`
+func animate_container(expanded: bool):
+	# Kill any existing tween
+	if tween and tween.is_valid():
+		tween.kill()
+	
+	var menu_width = popup_menu.size.x 
+	# EndX=0 wenn expanded, sonst -menu_width
+	var end_x = side_container_OG_position if expanded else (side_container.position.x + popup_menu.size.x)
+	var final_scale_x = -1 if expanded else 1
+
+	tween = get_tree().create_tween()
+	tween.tween_property(side_container, "position:x", end_x, animation_time) \
+		.set_trans(Tween.TRANS_EXPO) \
+		.set_ease(Tween.EASE_OUT)
+
+
+	tween.parallel().tween_property($HBoxContainer/Panel/MarginContainer, "scale:x", final_scale_x, animation_time)
+
+# -------------------------------------------------------------------------
+# Popup / Menü-Logik
+# -------------------------------------------------------------------------
+
 func _update_menu_visibility():
 	popup_menu.visible = menu_open
 
-# --- Material-Logik ---
-# Callback-Funktion: Wireframe-Ansicht aktivieren
 func _on_wire_frame_pressed():
 	_set_model_material(wireframe_material)
-	menu_open = false  # Menü schließen nach Auswahl
-	_update_menu_visibility()
+	#_close_popup()
 
-# Callback-Funktion: Texturierte Ansicht aktivieren
 func _on_uv_grid_pressed():
 	_set_model_material(textured_material)
-	menu_open = false  # Menü schließen nach Auswahl
-	_update_menu_visibility()
+	#_close_popup()
 
-# Callback-Funktion: Normalen-Ansicht aktivieren
 func _on_normals_pressed():
 	_set_model_material(normals_material)
-	menu_open = false  # Menü schließen nach Auswahl
-	_update_menu_visibility()
+	#_close_popup()
 
 func _on_metallic_pressed():
 	_set_model_material(metallic_material)
-	menu_open = false  # Menü schließen nach Auswahl
-	_update_menu_visibility()
+	#_close_popup()
 
 func _on_mat_cap_pressed():
 	_set_model_material(matcap_material)
-	menu_open = false  # Menü schließen nach Auswahl
-	_update_menu_visibility()
+	#_close_popup()
 
-# Callback-Funktion: Schattierte Ansicht (Standard) aktivieren
 func _on_shaded_pressed():
 	_reset_to_original_material()
-	menu_open = false  # Menü schließen nach Auswahl
-	_update_menu_visibility()
-	
+	#_close_popup()
 
 func _on_ev_active_pressed():
-	if main.EV_active == true:
-		main.EV_active = false
-		#Hier noch case einbauen, für den Fall dass der Button verwendet wird während man in der EV ist
-		#main.selected_part = main.model
-		#main.current_node = main.model
-		#main.set_focus_on_level(main.model)  # HIER LIEGT DAS PROBLEM MIT DEM TURNTABLE VERSATZ, WEIL DOPPELT BERECHNET WIRD
-	else:
-		main.EV_active = true
-	pass # Replace with function body.
+	main.EV_active = not main.EV_active
 
+func _close_popup():
+	menu_open = false
+	_update_menu_visibility()
+
+# -------------------------------------------------------------------------
+# Material / Modell-Funktionen
+# -------------------------------------------------------------------------
+
+func _set_model_material(material: Resource):
+	active_material = material
+	var meshes = _find_all_meshes_in_node(model_container)
+	for mesh in meshes:
+		if mesh.mesh:
+			for i in range(mesh.mesh.get_surface_count()):
+				mesh.set_surface_override_material(i, material)
+
+# Originalmaterialien wiederherstellen
+func _reset_to_original_material():
+	var meshes = _find_all_meshes_in_node(model_container)
+	for mesh in meshes:
+		reset_material_to_original(mesh)
 
 # Speichert die Originalmaterialien des Modells
 func _save_original_materials():
@@ -93,21 +129,6 @@ func _save_original_materials():
 					material = mesh.mesh.surface_get_material(i)
 				surfaces.append(material)
 			original_materials[mesh] = surfaces
-
-# Setzt ein bestimmtes Material für das gesamte Modell
-func _set_model_material(material: Resource):
-	active_material = material  # Speichere das aktive Material
-	var meshes = _find_all_meshes_in_node(model_container)
-	for mesh in meshes:
-		if mesh.mesh:
-			for i in range(mesh.mesh.get_surface_count()):
-				mesh.set_surface_override_material(i, material)
-
-func _reset_to_original_material():
-	var meshes = _find_all_meshes_in_node(model_container)
-	for mesh in meshes:
-		reset_material_to_original(mesh)
-
 
 # Findet alle MeshInstance3D-Knoten im gegebenen Node
 func _find_all_meshes_in_node(node: Node) -> Array:

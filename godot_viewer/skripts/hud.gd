@@ -10,6 +10,11 @@ func _ready():
 	change_camera_background_color(Color.html("#E6E0D4"))  # Hellgra, wenn aktiviert
 	pass
 
+func update_info_name(name: String):
+	get_node("InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer/Name").text = str(name)
+
+func update_info_count(count: String):
+	get_node("InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer/VerticeCount").text = str(count)
 
 func change_camera_background_color(color: Color):
 	# Camera nach environment Source checken

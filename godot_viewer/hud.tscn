@@ -1,6 +1,21 @@
-[gd_scene load_steps=2 format=3 uid="uid://cnx4n6unxh68o"]
+[gd_scene load_steps=9 format=3 uid="uid://cnx4n6unxh68o"]
 
 [ext_resource type="Script" path="res://skripts/hud.gd" id="1_yyrs7"]
+[ext_resource type="Script" path="res://skripts/view_menu.gd" id="2_dqytv"]
+[ext_resource type="StyleBox" uid="uid://boswm60dl5kfb" path="res://styles/Menu_Box.tres" id="3_7fnn8"]
+[ext_resource type="Texture2D" uid="uid://ba14y1k3agbih" path="res://assets/DoubleArrowPng.png" id="4_jtj3l"]
+[ext_resource type="Texture2D" uid="uid://yxj1i6iygakv" path="res://assets/HFU_logo.png" id="4_ntolk"]
+[ext_resource type="StyleBox" uid="uid://1wnsx0olxm3k" path="res://styles/Info_Box.tres" id="6_qsail"]
+
+[sub_resource type="Shader" id="Shader_ax1fl"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.3.stable's CanvasItemMaterial.
+
+shader_type canvas_item;
+render_mode blend_mix;
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nvulw"]
+shader = SubResource("Shader_ax1fl")
 
 [node name="Hud" type="Control"]
 layout_mode = 3
@@ -10,3 +25,256 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_yyrs7")
+
+[node name="ViewMenu" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 2
+script = ExtResource("2_dqytv")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ViewMenu"]
+layout_direction = 1
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -279.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="Panel" type="Panel" parent="ViewMenu/HBoxContainer"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 8
+theme_override_styles/panel = ExtResource("3_7fnn8")
+
+[node name="MarginContainer" type="MarginContainer" parent="ViewMenu/HBoxContainer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(16, 15)
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="BurgerButton" type="TextureButton" parent="ViewMenu/HBoxContainer/Panel/MarginContainer"]
+layout_mode = 2
+texture_normal = ExtResource("4_jtj3l")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="PopupMenu" type="Control" parent="ViewMenu/HBoxContainer"]
+material = SubResource("ShaderMaterial_nvulw")
+custom_minimum_size = Vector2(225, 0)
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="Panel" type="Panel" parent="ViewMenu/HBoxContainer/PopupMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("3_7fnn8")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ViewMenu/HBoxContainer/PopupMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Material Options:"
+fit_content = true
+
+[node name="GridContainer" type="GridContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 20
+
+[node name="WireFrame" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+disabled = true
+keep_pressed_outside = true
+text = "show Wireframe"
+
+[node name="Normals" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+disabled = true
+keep_pressed_outside = true
+text = "show Normals"
+
+[node name="UvGrid" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+keep_pressed_outside = true
+text = "show UVs
+"
+
+[node name="Metallic" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+keep_pressed_outside = true
+text = "show Metallic"
+
+[node name="MatCap" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+keep_pressed_outside = true
+text = "show MatCap"
+
+[node name="Shaded" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+keep_pressed_outside = true
+text = "show Standard"
+
+[node name="MarginContainer2" type="MarginContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 6
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2"]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+text = "Scene Options:"
+fit_content = true
+
+[node name="GridContainer" type="GridContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/v_separation = 20
+
+[node name="Backgroundcolor" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+text = "change Background"
+
+[node name="EvActive" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+keep_pressed_outside = true
+text = "Disable Explosion View"
+
+[node name="MarginContainer" type="MarginContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer"]
+layout_direction = 2
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="TextureRect" type="TextureRect" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 10
+texture = ExtResource("4_ntolk")
+expand_mode = 5
+
+[node name="InfoPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -116.0
+offset_right = 314.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_styles/panel = ExtResource("6_qsail")
+
+[node name="Panel" type="Panel" parent="InfoPanel"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("3_7fnn8")
+
+[node name="MarginContainer" type="MarginContainer" parent="InfoPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="InfoPanel/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="InfoPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VSplitContainer" type="VSplitContainer" parent="InfoPanel/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Name" type="RichTextLabel" parent="InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer"]
+layout_mode = 2
+text = "Naming Error"
+fit_content = true
+
+[node name="VerticeCount" type="RichTextLabel" parent="InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer"]
+layout_mode = 2
+text = "Vertice Count Error"
+fit_content = true
+tab_size = 1
+
+[connection signal="pressed" from="ViewMenu/HBoxContainer/Panel/MarginContainer/BurgerButton" to="ViewMenu" method="_on_burger_button_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/WireFrame" to="ViewMenu" method="_on_wire_frame_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Normals" to="ViewMenu" method="_on_normals_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/UvGrid" to="ViewMenu" method="_on_uv_grid_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Metallic" to="ViewMenu" method="_on_metallic_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/MatCap" to="ViewMenu" method="_on_mat_cap_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Shaded" to="ViewMenu" method="_on_shaded_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/Backgroundcolor" to="." method="_on_backgroundcolor_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/EvActive" to="ViewMenu" method="_on_ev_active_pressed"]

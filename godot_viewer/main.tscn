@@ -1,14 +1,11 @@
-[gd_scene load_steps=15 format=3 uid="uid://gynpel7qpjrr"]
+[gd_scene load_steps=9 format=3 uid="uid://gynpel7qpjrr"]
 
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
-[ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_niqdy"]
+[ext_resource type="PackedScene" uid="uid://b485wc6ufwbt1" path="res://model/alt_models/ModelA.glb" id="4_na3yd"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
-[ext_resource type="Script" path="res://skripts/view_menu.gd" id="7_mct8y"]
-[ext_resource type="Texture2D" uid="uid://c2ipurv22hd4a" path="res://Hochschule_Furtwangen_logo.svg" id="8_n0juw"]
-[ext_resource type="StyleBox" uid="uid://boswm60dl5kfb" path="res://styles/BoxStyle.tres" id="9_4jfkl"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_u1gci"]
 shader = ExtResource("4_o7hb1")
@@ -20,19 +17,6 @@ shader_parameter/vignette_softness = 0.5
 background_color = Color(0, 0.625587, 0.651219, 1)
 ambient_light_source = 1
 reflected_light_source = 1
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_yh3cv"]
-load_path = "res://.godot/imported/BurgerMenu.png-e38c56574dd31d1b52cf072decb10f99.ctex"
-
-[sub_resource type="Shader" id="Shader_ax1fl"]
-code = "// NOTE: Shader automatically converted from Godot Engine 4.3.stable's CanvasItemMaterial.
-
-shader_type canvas_item;
-render_mode blend_mix;
-"
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_kqsm8"]
-shader = SubResource("Shader_ax1fl")
 
 [node name="main" type="Node3D"]
 script = ExtResource("1_it4ho")
@@ -49,7 +33,7 @@ size = Vector2i(1280, 720)
 
 [node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
 
-[node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_niqdy")]
+[node name="ModelA" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_na3yd")]
 
 [node name="camera_rig" type="Node3D" parent="."]
 script = ExtResource("3_p5mvp")
@@ -75,238 +59,3 @@ sky_mode = 1
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Hud" parent="CanvasLayer" instance=ExtResource("4_y7enc")]
-
-[node name="ViewMenu" type="Control" parent="CanvasLayer/Hud"]
-layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -264.0
-grow_horizontal = 0
-grow_vertical = 2
-script = ExtResource("7_mct8y")
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Hud/ViewMenu"]
-layout_direction = 1
-layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -274.0
-grow_horizontal = 0
-grow_vertical = 2
-
-[node name="BurgerButton" type="TextureButton" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer"]
-custom_minimum_size = Vector2(50, 50)
-layout_direction = 1
-layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 8
-texture_normal = SubResource("CompressedTexture2D_yh3cv")
-ignore_texture_size = true
-stretch_mode = 0
-
-[node name="PopupMenu" type="Control" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer"]
-material = SubResource("ShaderMaterial_kqsm8")
-custom_minimum_size = Vector2(220, 0)
-layout_direction = 2
-layout_mode = 2
-size_flags_horizontal = 10
-
-[node name="Panel" type="Panel" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = ExtResource("9_4jfkl")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 4
-
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer"]
-layout_mode = 2
-
-[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Material Options:"
-fit_content = true
-
-[node name="GridContainer" type="GridContainer" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 6
-theme_override_constants/h_separation = 3
-theme_override_constants/v_separation = 20
-
-[node name="WireFrame" type="Button" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 6
-disabled = true
-keep_pressed_outside = true
-text = "show Wireframe"
-
-[node name="Normals" type="Button" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
-layout_mode = 2
-size_flags_vertical = 6
-disabled = true
-keep_pressed_outside = true
-text = "show Normals"
-
-[node name="UvGrid" type="Button" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
-layout_mode = 2
-size_flags_vertical = 6
-keep_pressed_outside = true
-text = "show UVs
-"
-
-[node name="Metallic" type="Button" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
-layout_mode = 2
-size_flags_vertical = 6
-keep_pressed_outside = true
-text = "show Metallic"
-
-[node name="MatCap" type="Button" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
-layout_mode = 2
-size_flags_vertical = 6
-keep_pressed_outside = true
-text = "show MatCap"
-
-[node name="Shaded" type="Button" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
-layout_mode = 2
-size_flags_vertical = 6
-keep_pressed_outside = true
-text = "show Standard"
-
-[node name="MarginContainer2" type="MarginContainer" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 6
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2"]
-layout_mode = 2
-
-[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
-layout_mode = 2
-text = "Scene Options:"
-fit_content = true
-
-[node name="GridContainer" type="GridContainer" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/v_separation = 20
-
-[node name="Backgroundcolor" type="Button" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
-layout_mode = 2
-size_flags_vertical = 6
-text = "change Background"
-
-[node name="EvActive" type="Button" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
-layout_mode = 2
-size_flags_vertical = 6
-keep_pressed_outside = true
-text = "Disable Explosion View"
-
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer"]
-layout_direction = 2
-layout_mode = 2
-size_flags_vertical = 8
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
-
-[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 10
-texture = ExtResource("8_n0juw")
-expand_mode = 5
-
-[node name="InfoPanel" type="Panel" parent="CanvasLayer/Hud"]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -116.0
-offset_right = 276.0
-offset_bottom = -20.0
-grow_vertical = 0
-
-[node name="Panel" type="Panel" parent="CanvasLayer/Hud/InfoPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = ExtResource("9_4jfkl")
-
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Hud/InfoPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Hud/InfoPanel/MarginContainer"]
-layout_mode = 2
-size_flags_vertical = 4
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Hud/InfoPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="VSplitContainer" type="VSplitContainer" parent="CanvasLayer/Hud/InfoPanel/MarginContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hud/InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer"]
-layout_mode = 2
-text = "Icosphere_003"
-fit_content = true
-
-[node name="RichTextLabel2" type="RichTextLabel" parent="CanvasLayer/Hud/InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer"]
-layout_mode = 2
-text = "Vertices 3000000"
-fit_content = true
-
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/HBoxContainer/BurgerButton" to="CanvasLayer/Hud/ViewMenu" method="_on_burger_button_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/WireFrame" to="CanvasLayer/Hud/ViewMenu" method="_on_wire_frame_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Normals" to="CanvasLayer/Hud/ViewMenu" method="_on_normals_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/UvGrid" to="CanvasLayer/Hud/ViewMenu" method="_on_uv_grid_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Metallic" to="CanvasLayer/Hud/ViewMenu" method="_on_metallic_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/MatCap" to="CanvasLayer/Hud/ViewMenu" method="_on_mat_cap_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Shaded" to="CanvasLayer/Hud/ViewMenu" method="_on_shaded_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/Backgroundcolor" to="CanvasLayer/Hud" method="_on_backgroundcolor_pressed"]
-[connection signal="pressed" from="CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/EvActive" to="CanvasLayer/Hud/ViewMenu" method="_on_ev_active_pressed"]

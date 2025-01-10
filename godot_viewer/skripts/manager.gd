@@ -3,6 +3,7 @@ extends Node3D
 @onready var camera: Camera3D = $camera_rig/camera_arm/camera
 @onready var model_container: Node3D = $turntable/VignetteSubViewport/model_container
 @onready var view_menu: Control = $CanvasLayer/Hud/ViewMenu
+@onready var hud: Control = $CanvasLayer/Hud
 @onready var model: Node3D = model_container.get_child(0)
 
 @export var selection_distance = 1000.0
@@ -19,7 +20,6 @@ var current_node
 var EV_active = true
 @export var highlight_material: Resource = preload("res://materials/highlight_material.tres")
 
-
 var hovered_mesh: MeshInstance3D = null
 var original_materials = {}
 
@@ -32,6 +32,7 @@ func _ready():
 	current_node = model
 	#print("- - - - - - - Model Hierarchy - - - - - - - ")  
 	#print_hierarchy(model_hierarchy)# Debugging: Hierarchie ausgeben
+	get_stats_for_entire_model()
 
 func _process(delta):
 	var mouse_vel = Input.get_last_mouse_velocity()
@@ -64,42 +65,18 @@ func _process(delta):
 
 			hovered_mesh = new_hovered
 
-func apply_highlight(mesh: MeshInstance3D):
-	var surfaces = mesh.mesh.get_surface_count()
-	for i in range(surfaces):
-		# Überschreibe Material mit EINEM globalen highlight_material
-		mesh.set_surface_override_material(i, highlight_material)
-
-func remove_highlight(mesh: MeshInstance3D):
-	var surfaces = mesh.mesh.get_surface_count()
-	for i in range(surfaces):
-		# Entferne Override => Originalmaterial kommt zurück
-		mesh.set_surface_override_material(i, null)
-
-#func apply_highlight(mesh: MeshInstance3D):
-	#if not mesh.mesh:
+func _input(event):
+	#if view_menu.menu_open:
 		#return
-	## Speichere Originalmaterialien
-	#var surfaces = mesh.mesh.get_surface_count()
-	#original_materials[mesh] = []
-	#for i in range(surfaces):
-		#var mat = mesh.mesh.surface_get_material(i)
-		#original_materials[mesh].append(mat)
-		#if mat:
-			#var highlight_mat = mat.duplicate()
-			#if highlight_mat is BaseMaterial3D:
-				#highlight_mat.emission_enabled = true
-				#highlight_mat.emission = Color.YELLOW
-				#highlight_mat.emission_energy = 2.0
-			#mesh.set_surface_override_material(i, highlight_mat)
 
-func restore_original_material(mesh: MeshInstance3D):
-	if mesh not in original_materials:
-		return
-	var surfaces = mesh.mesh.get_surface_count()
-	for i in range(surfaces):
-		mesh.set_surface_override_material(i, null)
-	original_materials.erase(mesh)
+	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT and !$turntable.is_transitioning:
+		if EV_active:
+			var current_time = Time.get_ticks_msec() / 1000.0
+			if current_time - last_click_time <= double_click_time:
+				#print("[DEBUG] Double-click detected.")
+				
+				_select_model_part()
+			last_click_time = current_time
 
 # Generiert Trimesh-Collider für alle relevanten Meshes
 func generate_colliders(node: Node):
@@ -133,17 +110,33 @@ func print_hierarchy(hierarchy: Dictionary, prefix: String = ""):
 		# Rekursiver Aufruf mit erweitertem Prefix für die Hierarchieebene
 		print_hierarchy(hierarchy[node], prefix + "  ")
 
-func _input(event):
-	#if view_menu.menu_open:
-		#return
+func get_stats_for_entire_model():
+	var stats = collect_stats_for_branch(model_hierarchy)
+	# Dann HUD updaten
+	hud.update_info_count("Vertices: %d   Faces: %d" % [stats["vertices"], stats["faces"]])
+	hud.update_info_name("Entire Model")
 
-	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT and !$turntable.is_transitioning:
-		if EV_active:
-			var current_time = Time.get_ticks_msec() / 1000.0
-			if current_time - last_click_time <= double_click_time:
-				#print("[DEBUG] Double-click detected.")
-				_select_model_part()
-			last_click_time = current_time
+
+func apply_highlight(mesh: MeshInstance3D):
+	var surfaces = mesh.mesh.get_surface_count()
+	for i in range(surfaces):
+		# Überschreibe Material mit EINEM globalen highlight_material
+		mesh.set_surface_override_material(i, highlight_material)
+
+func remove_highlight(mesh: MeshInstance3D):
+	var surfaces = mesh.mesh.get_surface_count()
+	for i in range(surfaces):
+		# Entferne Override => Originalmaterial kommt zurück
+		mesh.set_surface_override_material(i, null)
+
+func restore_original_material(mesh: MeshInstance3D):
+	if mesh not in original_materials:
+		return
+	var surfaces = mesh.mesh.get_surface_count()
+	for i in range(surfaces):
+		mesh.set_surface_override_material(i, null)
+	original_materials.erase(mesh)
+
 
 func _select_model_part():
 	var from = camera.project_ray_origin(get_viewport().get_mouse_position())
@@ -196,7 +189,6 @@ func _select_model_part():
 					# => evtl. "enter_sub_level()" oder "enter_parent_level()" 
 					print("Kein Parentbranch gefunden, fallback.")
 					enter_parent_level()
-				
 				return
 		current_node = current_node.get_parent()
 		#print("Ich sollte nicht passieren")
@@ -256,6 +248,21 @@ func set_focus_on_level(node: Node):
 	update_transparency_for_current_view(node)
 	$turntable.set_focus_on_object(node)
 
+	# --> NUN STATS UPDATEN
+	if node == model:
+		# Dann haben wir "gesamtes Modell" (Root)
+		get_stats_for_entire_model()
+	elif node is MeshInstance3D:
+		var subtree: Dictionary = model_hierarchy.get(node, {})
+		var stats = get_mesh_stats(node)
+		var child_stats = collect_stats_for_branch(subtree)
+		var total_vertices = stats["vertices"] + child_stats["vertices"]
+		var total_faces = stats["faces"] + child_stats["faces"]
+
+		hud.update_info_count("Vertices: %d   Faces: %d" % [total_vertices, total_faces])
+		hud.update_info_name(node.name)
+
+
 # Aktualisiert die Transparenz basierend auf der aktuellen Ebene
 func update_transparency_for_current_view(except_node: Node = null):
 	for child in parent_node.get_children():
@@ -306,3 +313,50 @@ func search_for_mesh_parent(node: Node) -> Node:
 # Überprüfen, ob current_node ein direktes Child von parent_node ist
 func _is_direct_child(parent_node: Node, current_node: Node) -> bool:
 	return current_node.get_parent() == parent_node
+
+
+# Gibt { "vertices": int, "faces": int } zurück
+func get_mesh_stats(mesh_instance: MeshInstance3D) -> Dictionary:
+	var total_vertices = 0
+	var total_faces = 0
+
+	if not mesh_instance.mesh:
+		return {"vertices": 0, "faces": 0}
+
+	var surface_count = mesh_instance.mesh.get_surface_count()
+	for s in range(surface_count):
+		var arrays = mesh_instance.mesh.surface_get_arrays(s)
+		if arrays.size() > Mesh.ARRAY_VERTEX:
+			# Vertex-Array
+			var vertex_array = arrays[Mesh.ARRAY_VERTEX]
+			total_vertices += vertex_array.size()
+
+			# Index-Array
+			var index_array = arrays[Mesh.ARRAY_INDEX]
+			if index_array and index_array.size() > 0:
+				total_faces += int(index_array.size() / 3)
+			else:
+				# Falls kein Index: kannst du Face-Anzahl schätzen (vertex_array.size()/3),
+				# aber nur wenn du sicher weißt, es sind Dreiecke.
+				pass
+
+	return {"vertices": total_vertices, "faces": total_faces}
+
+
+# Summiert rekursiv die Stats für alle Meshes im Dictionary-Ast
+func collect_stats_for_branch(hierarchy: Dictionary) -> Dictionary:
+	var total_vertices = 0
+	var total_faces = 0
+
+	for mesh in hierarchy.keys():
+		# Stats des Meshes addieren
+		var mesh_stats = get_mesh_stats(mesh)
+		total_vertices += mesh_stats["vertices"]
+		total_faces += mesh_stats["faces"]
+
+		# Rekursiv die Kinder addieren
+		var child_stats = collect_stats_for_branch(hierarchy[mesh])
+		total_vertices += child_stats["vertices"]
+		total_faces += child_stats["faces"]
+
+	return {"vertices": total_vertices, "faces": total_faces}
