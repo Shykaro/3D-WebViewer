@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://cnx4n6unxh68o"]
+[gd_scene load_steps=10 format=3 uid="uid://cnx4n6unxh68o"]
 
 [ext_resource type="Script" path="res://skripts/hud.gd" id="1_yyrs7"]
 [ext_resource type="Script" path="res://skripts/view_menu.gd" id="2_dqytv"]
 [ext_resource type="StyleBox" uid="uid://boswm60dl5kfb" path="res://styles/Menu_Box.tres" id="3_7fnn8"]
+[ext_resource type="Theme" uid="uid://bhk5ecn8ewmvx" path="res://styles/Fold_Button.tres" id="4_ir3mn"]
 [ext_resource type="Texture2D" uid="uid://ba14y1k3agbih" path="res://assets/DoubleArrowPng.png" id="4_jtj3l"]
 [ext_resource type="Texture2D" uid="uid://yxj1i6iygakv" path="res://assets/HFU_logo.png" id="4_ntolk"]
 [ext_resource type="StyleBox" uid="uid://1wnsx0olxm3k" path="res://styles/Info_Box.tres" id="6_qsail"]
@@ -70,6 +71,7 @@ theme_override_constants/margin_bottom = 5
 
 [node name="BurgerButton" type="TextureButton" parent="ViewMenu/HBoxContainer/Panel/MarginContainer"]
 layout_mode = 2
+theme = ExtResource("4_ir3mn")
 texture_normal = ExtResource("4_jtj3l")
 ignore_texture_size = true
 stretch_mode = 0
@@ -246,25 +248,26 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="VBoxContainer" type="VBoxContainer" parent="InfoPanel/MarginContainer"]
-layout_mode = 2
-size_flags_vertical = 4
-
-[node name="HBoxContainer" type="HBoxContainer" parent="InfoPanel/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="InfoPanel/MarginContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VSplitContainer" type="VSplitContainer" parent="InfoPanel/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="InfoPanel/MarginContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 
-[node name="Name" type="RichTextLabel" parent="InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer"]
+[node name="Name" type="RichTextLabel" parent="InfoPanel/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 text = "Naming Error"
 fit_content = true
 
-[node name="VerticeCount" type="RichTextLabel" parent="InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer"]
+[node name="VerticeCount" type="RichTextLabel" parent="InfoPanel/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 text = "Vertice Count Error"
 fit_content = true
 tab_size = 1

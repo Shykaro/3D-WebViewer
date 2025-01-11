@@ -11,10 +11,10 @@ func _ready():
 	pass
 
 func update_info_name(name: String):
-	get_node("InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer/Name").text = str(name)
+	get_node("InfoPanel/MarginContainer/HBoxContainer/VBoxContainer/Name").text = str(name)
 
 func update_info_count(count: String):
-	get_node("InfoPanel/MarginContainer/VBoxContainer/HBoxContainer/VSplitContainer/VerticeCount").text = str(count)
+	get_node("InfoPanel/MarginContainer/HBoxContainer/VBoxContainer/VerticeCount").text = str(count)
 
 func change_camera_background_color(color: Color):
 	# Camera nach environment Source checken
@@ -38,4 +38,3 @@ func _on_backgroundcolor_pressed() -> void:
 		2:
 			change_camera_background_color(Color.html("#E6E0D4"))  # Hellgra, wenn aktiviert
 			counter = 0
-	

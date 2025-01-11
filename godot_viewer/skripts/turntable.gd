@@ -3,7 +3,7 @@ extends Node3D
 @export var Scale = 2
 @export var Zoom_Multiplier = 0.35
 @export var transition_duration = 1.0
-@export var explosion_distance = 5.0
+@export var explosion_distance = 10.0
 @export var explosion_duration = 1.0
 
 var start_position = Vector3()
@@ -118,8 +118,6 @@ func calculate_mesh_center(mesh_instance: MeshInstance3D) -> Vector3:
 		var aabb = mesh_instance.mesh.get_aabb()
 		return gtf.origin + (gtf.basis * aabb.get_center())
 	return Vector3.ZERO
-
-# Startet die Explosion eines ausgewählten Teils
 func start_explosion(selected_part: MeshInstance3D):
 	if is_animation_active:
 		return
@@ -133,11 +131,17 @@ func start_explosion(selected_part: MeshInstance3D):
 	is_in_explosion_view = true
 	var parent_branch = find_parent_branch(current_hierarchy, selected_part)
 
+	var selected_radius = calculate_bounding_sphere(selected_part)
+
 	for mesh in parent_branch.keys():
 		if mesh != selected_part:
 			var mesh_center = calculate_mesh_center(mesh)
 			var direction = (mesh_center - center_point).normalized()
-			var total_dist = explosion_distance + calculate_bounding_sphere(mesh) * 0.1
+
+			# Dynamische Distanz
+			var own_radius = calculate_bounding_sphere(mesh)
+			var total_dist = explosion_distance + own_radius + selected_radius
+
 			var target_pos = mesh_center + direction * total_dist
 
 			mesh_original_positions[mesh] = mesh.global_transform.origin

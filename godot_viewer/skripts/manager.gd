@@ -113,7 +113,7 @@ func print_hierarchy(hierarchy: Dictionary, prefix: String = ""):
 func get_stats_for_entire_model():
 	var stats = collect_stats_for_branch(model_hierarchy)
 	# Dann HUD updaten
-	hud.update_info_count("Vertices: %d   Faces: %d" % [stats["vertices"], stats["faces"]])
+	hud.update_info_count("Vertices: %d   Faces: %d" % [stats["vertices"]/2, stats["faces"]/2])
 	hud.update_info_name("Entire Model")
 
 
@@ -125,9 +125,15 @@ func apply_highlight(mesh: MeshInstance3D):
 
 func remove_highlight(mesh: MeshInstance3D):
 	var surfaces = mesh.mesh.get_surface_count()
+	
+	# Hole das derzeit ausgewählte globale Material aus dem ViewMenu.
+	# (Achtung: Stelle sicher, dass 'view_menu' ein Skript mit 'active_material' hat!)
+	var current_mat = view_menu.active_material
+	
 	for i in range(surfaces):
-		# Entferne Override => Originalmaterial kommt zurück
-		mesh.set_surface_override_material(i, null)
+		# Anstelle von 'null' => setze das globale active_material
+		mesh.set_surface_override_material(i, current_mat)
+
 
 func restore_original_material(mesh: MeshInstance3D):
 	if mesh not in original_materials:
@@ -259,7 +265,7 @@ func set_focus_on_level(node: Node):
 		var total_vertices = stats["vertices"] + child_stats["vertices"]
 		var total_faces = stats["faces"] + child_stats["faces"]
 
-		hud.update_info_count("Vertices: %d   Faces: %d" % [total_vertices, total_faces])
+		hud.update_info_count("Vertices: %d   Faces: %d" % [total_vertices/2, total_faces/2])
 		hud.update_info_name(node.name)
 
 
