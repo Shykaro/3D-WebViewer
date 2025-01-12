@@ -4,7 +4,7 @@ extends Control
 @export var wireframe_material: Resource = preload("res://materials/WireframeMaterial.tres")
 @export var textured_material: Resource = preload("res://materials/UVGridTexture.tres")
 @export var normals_material: Resource = preload("res://materials/NormalsMaterial.tres")
-@export var metallic_material: Resource = preload("res://materials/MetallicMaterial.tres")
+@export var metallic_material: Resource = preload("res://materials/MetallicMatCap.tres")
 @export var matcap_material: Resource = preload("res://materials/MatCapMaterial.tres")
 @export var active_material: Resource
 
@@ -19,12 +19,14 @@ var is_expanded = false
 var tween
 
 @onready var side_container: Control = $HBoxContainer
-@onready var menu_button: TextureButton = $HBoxContainer/Panel/MarginContainer/BurgerButton
+@onready var menu_button: TextureButton = $HBoxContainer/ArrowPanel/MarginContainer/BurgerButton
 @onready var popup_menu: Control = $HBoxContainer/PopupMenu
 
 var side_container_OG_position
 
 @export var menu_open = false
+
+var mouse_currently_over_menu
 
 var original_materials = {}
 
@@ -60,7 +62,7 @@ func animate_container(expanded: bool):
 		.set_ease(Tween.EASE_OUT)
 
 
-	tween.parallel().tween_property($HBoxContainer/Panel/MarginContainer, "scale:x", final_scale_x, animation_time)
+	tween.parallel().tween_property($HBoxContainer/ArrowPanel/MarginContainer, "scale:x", final_scale_x, animation_time)
 
 # -------------------------------------------------------------------------
 # Popup / Menü-Logik
@@ -69,32 +71,78 @@ func animate_container(expanded: bool):
 func _update_menu_visibility():
 	popup_menu.visible = menu_open
 
-func _on_wire_frame_pressed():
-	_set_model_material(wireframe_material)
-	#_close_popup()
-
-func _on_uv_grid_pressed():
-	_set_model_material(textured_material)
-	#_close_popup()
-
-func _on_normals_pressed():
-	_set_model_material(normals_material)
-	#_close_popup()
-
-func _on_metallic_pressed():
-	_set_model_material(metallic_material)
-	#_close_popup()
-
-func _on_mat_cap_pressed():
-	_set_model_material(matcap_material)
-	#_close_popup()
-
+#func _on_wire_frame_pressed():
+	#_set_model_material(wireframe_material)
+	##_close_popup()
+#
+#func _on_uv_grid_pressed():
+	#_set_model_material(textured_material)
+	##_close_popup()
+#
+#func _on_normals_pressed():
+	#_set_model_material(normals_material)
+	##_close_popup()
+#
+#func _on_metallic_pressed():
+	#_set_model_material(metallic_material)
+	##_close_popup()
+#
+#func _on_mat_cap_pressed():
+	#_set_model_material(matcap_material)
+	##_close_popup()
+#
 func _on_shaded_pressed():
 	_reset_to_original_material()
 	#_close_popup()
+#
+#func _on_ev_active_pressed():
+	#main.EV_active = not main.EV_active
 
-func _on_ev_active_pressed():
+func _on_wire_frame_toggled(toggled_on):
+	if toggled_on:
+		_set_model_material(wireframe_material)
+	else:
+		_reset_to_original_material()
+	pass # Replace with function body.
+
+
+func _on_normals_toggled(toggled_on):
+	if toggled_on:
+		_set_model_material(normals_material)
+	else:
+		_reset_to_original_material()
+	pass # Replace with function body.
+
+
+func _on_uv_grid_toggled(toggled_on):
+	if toggled_on:
+		_set_model_material(textured_material)
+	else:
+		_reset_to_original_material()
+	pass # Replace with function body.
+
+
+func _on_metallic_toggled(toggled_on):
+	if toggled_on:
+		_set_model_material(metallic_material)
+	else:
+		_reset_to_original_material()
+	pass # Replace with function body.
+
+
+func _on_mat_cap_toggled(toggled_on):
+	if toggled_on:
+		_set_model_material(matcap_material)
+	else:
+		_reset_to_original_material()
+	pass # Replace with function body.
+
+
+func _on_ev_active_toggled(toggled_on):
 	main.EV_active = not main.EV_active
+	pass # Replace with function body.
+
+
 
 func _close_popup():
 	menu_open = false
@@ -155,3 +203,26 @@ func reset_material_to_original(part: MeshInstance3D):
 			if material and material is BaseMaterial3D and material.albedo_color.a < 1.0:
 				material.set_transparency(BaseMaterial3D.TRANSPARENCY_ALPHA)
 				material.albedo_color.a = 0.2
+
+#func _on_arrow_panel_mouse_entered():
+	#mouse_currently_over_menu = true
+	#print("Set mouse entered: ", mouse_currently_over_menu)
+	#pass # Replace with function body.
+#
+#
+#func _on_arrow_panel_mouse_exited():
+	#mouse_currently_over_menu = false
+	#print("Set mouse entered: ", mouse_currently_over_menu)
+	#pass # Replace with function body.
+#
+#
+#func _on_menu_panel_mouse_entered():
+	#mouse_currently_over_menu = true
+	#print("Set mouse entered: ", mouse_currently_over_menu)
+	#pass # Replace with function body.
+#
+#
+#func _on_menu_panel_mouse_exited():
+	#mouse_currently_over_menu = false
+	#print("Set mouse entered: ", mouse_currently_over_menu)
+	#pass # Replace with function body.

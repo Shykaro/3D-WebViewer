@@ -139,6 +139,7 @@ func remove_highlight(mesh: MeshInstance3D):
 		current_mat = null
 	else:
 		current_mat = view_menu.active_material
+	#current_mat = null
 	
 	for i in range(surfaces):
 		# Anstelle von 'null' => setze das globale active_material
@@ -180,8 +181,11 @@ func _select_model_part():
 
 				if top_parent != null:
 					#push_state()  # Speichere aktuellen Zustand
+					
 					$turntable.start_explosion(top_parent)
+					
 					set_focus_on_level(top_parent)  # "tiefer" gehen in den Ast
+					#view_menu._set_model_material(view_menu.active_material)
 				else:
 					#print("Kein passender top-level parent gefunden.")
 					pass
@@ -203,8 +207,11 @@ func _select_model_part():
 				#print
 				if parent_branch != null:
 					#push_state()
+					
 					$turntable.start_explosion(parent_branch)
+					
 					set_focus_on_level(parent_branch)
+					#view_menu._set_model_material(view_menu.active_material)
 				else:
 					# Eventuell: "enter_sub_level()" oder "enter_parent_level()"
 					#print("Kein Parentbranch gefunden, fallback.")
@@ -280,7 +287,7 @@ func set_focus_on_level(node: Node):
 			if child is MeshInstance3D:
 				current_level.append(child)
 
-	update_transparency_for_current_view(node)
+	#update_transparency_for_current_view(node)
 	$turntable.set_focus_on_object(node)
 
 	# --> NUN STATS UPDATEN

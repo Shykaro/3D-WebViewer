@@ -9,6 +9,7 @@ var max_zoom = 100  # Optional behalten
 
 @onready var model_container = $"../turntable/VignetteSubViewport/model_container"
 @onready var turntable = $"../turntable"
+@onready var view_menu: Control = $"../CanvasLayer/Hud/ViewMenu"
 
 var rot_y = 0
 var rot_x = 0
@@ -30,6 +31,11 @@ func _ready():
 
 	_handle_zoom()
 
+#func _unhandled_input(event):
+	#if event is InputEventKey:
+		#if event.pressed and event.keycode == KEY_ESCAPE:
+			#get_tree().quit()
+
 func _process(delta):
 	var lr_axis = -Input.get_axis("turntable_left", "turntable_right")
 	if lr_axis != 0:
@@ -41,15 +47,21 @@ func _process(delta):
 
 	# Mausbewegung für Rotation
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		var mouse_vel = Input.get_last_mouse_velocity()
-		rot_y = rotation_speed * (-mouse_vel.x / 400) * delta * PI / 180
-		rot_x = rotation_speed * (-mouse_vel.y / 800) * delta * PI / 180
+		var mousePos = get_viewport().get_mouse_position()
+		var is_mouse_over_view_menu = $"../CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu".get_global_rect().has_point(mousePos) or $"../CanvasLayer/Hud/ViewMenu/HBoxContainer/ArrowPanel".get_global_rect().has_point(mousePos)
+		if !is_mouse_over_view_menu:
+			var mouse_vel = Input.get_last_mouse_velocity()
+			rot_y = rotation_speed * (-mouse_vel.x / 400) * delta * PI / 180
+			rot_x = rotation_speed * (-mouse_vel.y / 800) * delta * PI / 180
 
 	rotate_y(rot_y)
 	$camera_arm.rotate_x(rot_x)
 
 	rot_y *= 0.950
 	rot_x *= 0.950
+
+#func _on_mouse_exited():
+	#if not Rect2(Vector2(), size).has_point(get_local_mouse_position()):
 
 func calculate_camera_distance(dimensions: Vector3, fov: float, aspect_ratio: float) -> float:
 	var height = dimensions.y

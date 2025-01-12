@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://c5ejb4jl0q40p"]
+
+[ext_resource type="Shader" path="res://materials/MatCap.gdshader" id="1_2rkjs"]
+[ext_resource type="Texture2D" uid="uid://hfwlu7akwr8l" path="res://assets/metallic.exr" id="2_lg6cr"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_2rkjs")
+shader_parameter/margin = 0.099
+shader_parameter/is_spatial = false
+shader_parameter/matcap = ExtResource("2_lg6cr")

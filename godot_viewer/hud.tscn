@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cnx4n6unxh68o"]
+[gd_scene load_steps=18 format=3 uid="uid://cnx4n6unxh68o"]
 
 [ext_resource type="Script" path="res://skripts/hud.gd" id="1_yyrs7"]
 [ext_resource type="Script" path="res://skripts/view_menu.gd" id="2_dqytv"]
@@ -6,6 +6,8 @@
 [ext_resource type="Theme" uid="uid://bhk5ecn8ewmvx" path="res://styles/Fold_Button.tres" id="4_ir3mn"]
 [ext_resource type="Texture2D" uid="uid://ba14y1k3agbih" path="res://assets/DoubleArrowPng.png" id="4_jtj3l"]
 [ext_resource type="Texture2D" uid="uid://yxj1i6iygakv" path="res://assets/HFU_logo.png" id="4_ntolk"]
+[ext_resource type="ButtonGroup" uid="uid://dhbsdj8g8xo1" path="res://styles/Background_Colors.tres" id="6_d2ab7"]
+[ext_resource type="ButtonGroup" uid="uid://c5jsawf8vaop3" path="res://styles/Material_Options.tres" id="6_klr8a"]
 [ext_resource type="StyleBox" uid="uid://1wnsx0olxm3k" path="res://styles/Info_Box.tres" id="6_qsail"]
 
 [sub_resource type="Shader" id="Shader_ax1fl"]
@@ -17,6 +19,37 @@ render_mode blend_mix;
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nvulw"]
 shader = SubResource("Shader_ax1fl")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vhnya"]
+bg_color = Color(0.901961, 0.878431, 0.831373, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0901961, 0.0980392, 0.109804, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ubkr2"]
+bg_color = Color(0.901961, 0.878431, 0.831373, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b202y"]
+bg_color = Color(0.498039, 0.498039, 0.498039, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ik2dt"]
+bg_color = Color(0.498039, 0.498039, 0.498039, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ljow8"]
+bg_color = Color(0.0901961, 0.0980392, 0.109804, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vanf1"]
+bg_color = Color(0.0901961, 0.0980392, 0.109804, 1)
 
 [node name="Hud" type="Control"]
 layout_mode = 3
@@ -49,14 +82,14 @@ grow_horizontal = 0
 grow_vertical = 2
 theme_override_constants/separation = 0
 
-[node name="Panel" type="Panel" parent="ViewMenu/HBoxContainer"]
+[node name="ArrowPanel" type="Panel" parent="ViewMenu/HBoxContainer"]
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
 size_flags_horizontal = 10
 size_flags_vertical = 8
 theme_override_styles/panel = ExtResource("3_7fnn8")
 
-[node name="MarginContainer" type="MarginContainer" parent="ViewMenu/HBoxContainer/Panel"]
+[node name="MarginContainer" type="MarginContainer" parent="ViewMenu/HBoxContainer/ArrowPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -69,8 +102,9 @@ theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="BurgerButton" type="TextureButton" parent="ViewMenu/HBoxContainer/Panel/MarginContainer"]
+[node name="BurgerButton" type="TextureButton" parent="ViewMenu/HBoxContainer/ArrowPanel/MarginContainer"]
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme = ExtResource("4_ir3mn")
 texture_normal = ExtResource("4_jtj3l")
 ignore_texture_size = true
@@ -82,7 +116,7 @@ custom_minimum_size = Vector2(225, 0)
 layout_mode = 2
 size_flags_horizontal = 10
 
-[node name="Panel" type="Panel" parent="ViewMenu/HBoxContainer/PopupMenu"]
+[node name="MenuPanel" type="Panel" parent="ViewMenu/HBoxContainer/PopupMenu"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -114,10 +148,10 @@ theme_override_constants/margin_bottom = 20
 [node name="VBoxContainer" type="VBoxContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="RichTextLabel" type="RichTextLabel" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
-text = "Material Options:"
-fit_content = true
+theme_override_constants/margin_bottom = 5
 
 [node name="GridContainer" type="GridContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -125,44 +159,74 @@ size_flags_vertical = 6
 theme_override_constants/h_separation = 3
 theme_override_constants/v_separation = 20
 
+[node name="RichTextLabel" type="RichTextLabel" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Material Options:"
+fit_content = true
+
 [node name="WireFrame" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 6
+mouse_default_cursor_shape = 2
 disabled = true
+toggle_mode = true
 keep_pressed_outside = true
+button_group = ExtResource("6_klr8a")
 text = "show Wireframe"
 
 [node name="Normals" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 6
+mouse_default_cursor_shape = 2
 disabled = true
+toggle_mode = true
 keep_pressed_outside = true
+button_group = ExtResource("6_klr8a")
 text = "show Normals"
 
 [node name="UvGrid" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 6
+mouse_default_cursor_shape = 2
+toggle_mode = true
 keep_pressed_outside = true
+button_group = ExtResource("6_klr8a")
 text = "show UVs
 "
 
 [node name="Metallic" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 6
+mouse_default_cursor_shape = 2
+toggle_mode = true
 keep_pressed_outside = true
+button_group = ExtResource("6_klr8a")
 text = "show Metallic"
 
 [node name="MatCap" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 6
+mouse_default_cursor_shape = 2
+toggle_mode = true
 keep_pressed_outside = true
+button_group = ExtResource("6_klr8a")
 text = "show MatCap"
 
 [node name="Shaded" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 6
+mouse_default_cursor_shape = 2
+toggle_mode = true
+button_pressed = true
 keep_pressed_outside = true
+button_group = ExtResource("6_klr8a")
 text = "show Standard"
 
 [node name="MarginContainer2" type="MarginContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer"]
@@ -177,23 +241,61 @@ theme_override_constants/margin_bottom = 20
 [node name="VBoxContainer" type="VBoxContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2"]
 layout_mode = 2
 
-[node name="RichTextLabel" type="RichTextLabel" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
+[node name="GridContainer" type="GridContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 20
+
+[node name="RichTextLabel" type="RichTextLabel" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Scene Options:"
 fit_content = true
 
-[node name="GridContainer" type="GridContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
 layout_mode = 2
-theme_override_constants/v_separation = 20
-
-[node name="Backgroundcolor" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
-layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 6
-text = "change Background"
+
+[node name="Light_BG" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_default_cursor_shape = 2
+theme_override_styles/hover = SubResource("StyleBoxFlat_vhnya")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_vhnya")
+theme_override_styles/normal = SubResource("StyleBoxFlat_ubkr2")
+toggle_mode = true
+button_pressed = true
+button_group = ExtResource("6_d2ab7")
+
+[node name="Half_BG" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_default_cursor_shape = 2
+theme_override_styles/hover = SubResource("StyleBoxFlat_b202y")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_b202y")
+theme_override_styles/normal = SubResource("StyleBoxFlat_ik2dt")
+toggle_mode = true
+button_group = ExtResource("6_d2ab7")
+
+[node name="Dark_BG" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_default_cursor_shape = 2
+theme_override_styles/hover = SubResource("StyleBoxFlat_ljow8")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ljow8")
+theme_override_styles/normal = SubResource("StyleBoxFlat_vanf1")
+toggle_mode = true
+button_group = ExtResource("6_d2ab7")
 
 [node name="EvActive" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
 layout_mode = 2
 size_flags_vertical = 6
+mouse_default_cursor_shape = 2
+toggle_mode = true
 keep_pressed_outside = true
 text = "Disable Explosion View"
 
@@ -272,12 +374,23 @@ text = "Vertice Count Error"
 fit_content = true
 tab_size = 1
 
-[connection signal="pressed" from="ViewMenu/HBoxContainer/Panel/MarginContainer/BurgerButton" to="ViewMenu" method="_on_burger_button_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/ArrowPanel/MarginContainer/BurgerButton" to="ViewMenu" method="_on_burger_button_pressed"]
 [connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/WireFrame" to="ViewMenu" method="_on_wire_frame_pressed"]
+[connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/WireFrame" to="ViewMenu" method="_on_wire_frame_toggled"]
 [connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Normals" to="ViewMenu" method="_on_normals_pressed"]
+[connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Normals" to="ViewMenu" method="_on_normals_toggled"]
 [connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/UvGrid" to="ViewMenu" method="_on_uv_grid_pressed"]
+[connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/UvGrid" to="ViewMenu" method="_on_uv_grid_toggled"]
 [connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Metallic" to="ViewMenu" method="_on_metallic_pressed"]
+[connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Metallic" to="ViewMenu" method="_on_metallic_toggled"]
 [connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/MatCap" to="ViewMenu" method="_on_mat_cap_pressed"]
+[connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/MatCap" to="ViewMenu" method="_on_mat_cap_toggled"]
 [connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer/Shaded" to="ViewMenu" method="_on_shaded_pressed"]
-[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/Backgroundcolor" to="." method="_on_backgroundcolor_pressed"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Light_BG" to="." method="_on_light_bg_pressed"]
+[connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Light_BG" to="." method="_on_light_bg_toggled"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Half_BG" to="." method="_on_half_bg_pressed"]
+[connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Half_BG" to="." method="_on_half_bg_toggled"]
+[connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Dark_BG" to="." method="_on_dark_bg_pressed"]
+[connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Dark_BG" to="." method="_on_dark_bg_toggled"]
 [connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/EvActive" to="ViewMenu" method="_on_ev_active_pressed"]
+[connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/EvActive" to="ViewMenu" method="_on_ev_active_toggled"]
