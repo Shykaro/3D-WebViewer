@@ -9,13 +9,14 @@ extends Node3D
 @export var selection_distance = 1000.0
 @export var double_click_time = 0.3
 
-var selected_part = null
+var current_part = null
 var parent_node = null
 var current_level = []
 var model_hierarchy = {}
 var last_click_time = 0
+#var state_stack: Array = []
 
-var current_node
+var selected_mesh
 
 var EV_active = true
 @export var highlight_material: Resource = preload("res://materials/highlight_material.tres")
@@ -23,16 +24,21 @@ var EV_active = true
 var hovered_mesh: MeshInstance3D = null
 var original_materials = {}
 
+
 func _ready():
 	generate_colliders(model)  # Erstelle Collider für das Modell
 	model_hierarchy = build_hierarchy(model)  # Baue die Modellhierarchie
 	#set_focus_on_level(model)  # HIER LIEGT DAS PROBLEM MIT DEM TURNTABLE VERSATZ, WEIL DOPPELT BERECHNET WIRD
 	$turntable.calculate_whole_model_center(model_hierarchy)
-	selected_part = model
-	current_node = model
+	#selection_stack.push_back(model)
+	current_part = model
+	selected_mesh = model
 	#print("- - - - - - - Model Hierarchy - - - - - - - ")  
-	#print_hierarchy(model_hierarchy)# Debugging: Hierarchie ausgeben
+	#print_hierarchy(model_hierarchy)# Debugging
+	#print("- - - - - - - END - - - - - - - ")  
 	get_stats_for_entire_model()
+	view_menu._save_original_materials()
+	#push_state()
 
 func _process(delta):
 	var mouse_vel = Input.get_last_mouse_velocity()
@@ -128,7 +134,11 @@ func remove_highlight(mesh: MeshInstance3D):
 	
 	# Hole das derzeit ausgewählte globale Material aus dem ViewMenu.
 	# (Achtung: Stelle sicher, dass 'view_menu' ein Skript mit 'active_material' hat!)
-	var current_mat = view_menu.active_material
+	var current_mat
+	if view_menu.original_material_on:
+		current_mat = null
+	else:
+		current_mat = view_menu.active_material
 	
 	for i in range(surfaces):
 		# Anstelle von 'null' => setze das globale active_material
@@ -142,7 +152,7 @@ func restore_original_material(mesh: MeshInstance3D):
 	for i in range(surfaces):
 		mesh.set_surface_override_material(i, null)
 	original_materials.erase(mesh)
-
+# In manager.gd
 
 func _select_model_part():
 	var from = camera.project_ray_origin(get_viewport().get_mouse_position())
@@ -155,54 +165,59 @@ func _select_model_part():
 	var result = get_world_3d().direct_space_state.intersect_ray(ray_query)
 
 	if result and result.collider:
-		current_node = result.collider
+		selected_mesh = result.collider
+	else:
+		selected_mesh = null
 
-	while current_node:
-		#print("current_node: ", current_node)
-		if current_node is MeshInstance3D:
-			
-			var clicked_mesh = current_node
+	while selected_mesh:
+		if selected_mesh is MeshInstance3D:
+			var clicked_mesh = selected_mesh
+			#print("Clicked Mesh:", clicked_mesh.name)
 
-			if selected_part == model:
-				
-				# -> Wir sind auf Ober-Ebene
+			if current_part == model:
+				# Wir sind auf der obersten Ebene
 				var top_parent = find_top_level_key_including(model_hierarchy, clicked_mesh)
-				
+
 				if top_parent != null:
+					#push_state()  # Speichere aktuellen Zustand
 					$turntable.start_explosion(top_parent)
-					set_focus_on_level(top_parent)  # => "tiefer" gehen in Ast
-					#print("Lolol")
+					set_focus_on_level(top_parent)  # "tiefer" gehen in den Ast
 				else:
-					# Klick auf etwas, was nicht existiert => z. B. do nothing oder parent?
-					print("Kein passender top-level parent gefunden.")
+					#print("Kein passender top-level parent gefunden.")
+					pass
 				return
 			else:
 				# Wir sind auf Mesh-Ebene
-				# => subtree = model_hierarchy[selected_part]
-				var subtree = model_hierarchy.get(selected_part, null)
-				if subtree == null:
-					# fallback => wir haben keinen subtree => maybe do parent
+				#print("Current part for subtree: ", current_part)
+				var subtree = find_subtree(model_hierarchy, current_part)
+				#print("Subtree return: ", subtree)
+
+				if subtree.size() == 0:
+					# Fallback => wir haben keinen subtree => möglicherweise Parent
+					#print("Hier sollten wir nicht reinkommen")
 					enter_parent_level()
-					#print("Ich sollte nicht passieren")
 					return
 
-				# => finde dictionary-parent
+				# Finde das Dictionary-Parent
 				var parent_branch = find_parent_branch(subtree, clicked_mesh)
+				#print
 				if parent_branch != null:
+					#push_state()
 					$turntable.start_explosion(parent_branch)
 					set_focus_on_level(parent_branch)
 				else:
-					# => evtl. "enter_sub_level()" oder "enter_parent_level()" 
-					print("Kein Parentbranch gefunden, fallback.")
+					# Eventuell: "enter_sub_level()" oder "enter_parent_level()"
+					#print("Kein Parentbranch gefunden, fallback.")
 					enter_parent_level()
+					#$turntable.start_explosion(clicked_mesh)
+					#set_focus_on_level(clicked_mesh)
 				return
-		current_node = current_node.get_parent()
-		#print("Ich sollte nicht passieren")
-	# Falls wir gar keinen Mesh gefunden haben:
-	if selected_part != null:
-		print("Ich sollte nicht passieren")
-		enter_parent_level()
+		selected_mesh = selected_mesh.get_parent()
 
+	# Falls wir gar keinen Mesh gefunden haben:
+	if current_part != null:
+		#print("Ich sollte nicht passieren")
+		enter_parent_level()
 
 func find_top_level_key_including(hierarchy: Dictionary, mesh: MeshInstance3D) -> MeshInstance3D:
 	for top_mesh in hierarchy.keys():
@@ -214,6 +229,18 @@ func find_top_level_key_including(hierarchy: Dictionary, mesh: MeshInstance3D) -
 				return top_mesh
 	return null
 
+# Funktion zur rekursiven Suche nach dem Subtree für einen gegebenen Node
+func find_subtree(hierarchy: Dictionary, target_node: MeshInstance3D) -> Dictionary:
+	for key in hierarchy.keys():
+		if key == target_node:
+			return hierarchy[key]  # Subtree gefunden
+		# Rekursiver Aufruf für die Unterhierarchie
+		var result = find_subtree(hierarchy[key], target_node)
+		if result.size() > 0:
+			return result  # Subtree in der Unterhierarchie gefunden
+	return {}  # Subtree nicht gefunden
+
+
 # Hilfsfunktion: Prüft, ob 'mesh' im Dictionary 'subtree' enthalten ist.
 func find_in_subtree(subtree: Dictionary, mesh: MeshInstance3D) -> bool:
 	for child in subtree.keys():
@@ -224,14 +251,15 @@ func find_in_subtree(subtree: Dictionary, mesh: MeshInstance3D) -> bool:
 				return true
 	return false
 
-
 func find_parent_branch(subtree: Dictionary, mesh: MeshInstance3D) -> MeshInstance3D:
 	for child_mesh in subtree.keys():
+		#print("Überprüfe Child:", child_mesh.name)
 		if child_mesh == mesh:
-			return null
+			#print("Gefunden das gesuchte Mesh selbst, kein Parent.")
+			return child_mesh
 		else:
-			if mesh in subtree[child_mesh].keys():
-				# => child_mesh ist direkter Parent
+			if subtree[child_mesh].has(mesh):
+				#print("Gefunden Parent:", child_mesh.name, "für Mesh:", mesh.name)
 				return child_mesh
 			else:
 				var found = find_parent_branch(subtree[child_mesh], mesh)
@@ -239,10 +267,11 @@ func find_parent_branch(subtree: Dictionary, mesh: MeshInstance3D) -> MeshInstan
 					return found
 	return null
 
+
 func set_focus_on_level(node: Node):
 	print("[DEBUG] Setting focus on level: ", node.name)
-	selected_part = node
-	current_node = node
+	current_part = node
+	selected_mesh = node
 	parent_node = node.get_parent()
 	current_level = []
 
@@ -290,18 +319,20 @@ func make_part_transparent(part: MeshInstance3D):
 					part.set_surface_override_material(i, material)
 
 func enter_parent_level():
-	var current_node = selected_part
-	if current_node == model:
-		print("[DEBUG] Already at root level.")
+	
+	if current_part == model:
+		#print("[DEBUG] Already at root level.")
 		return
 
-	var mesh_parent = search_for_mesh_parent(current_node)
-	if mesh_parent:
-		#print("[DEBUG] Moving to parent level: ", mesh_parent.name)
-		set_focus_on_level(mesh_parent)  # Zuerst Fokus setzen
-		$turntable.start_implosion()  # Danach Implosion starten
+	if $turntable.state_stack.size() > 0:
+		#pop_state()  # Stelle letzten Zustand wieder her
+		var mesh_parent = search_for_mesh_parent(current_part)
+		if mesh_parent:
+			print("[DEBUG] Moving to parent level:", mesh_parent.name)
+			set_focus_on_level(mesh_parent)  # Fokus setzen
+			$turntable.start_implosion()  # Implosion starten
 	else:
-		#print("[DEBUG] Already at root level.")
+		#print("[DEBUG] Kein Zustand zum Wiederherstellen gefunden.")
 		pass
 
 # Rekursive Suche nach dem nächsten MeshInstance3D-Parent
@@ -315,11 +346,6 @@ func search_for_mesh_parent(node: Node) -> Node:
 		return parent
 	# Andernfalls, suche weiter rekursiv nach oben
 	return search_for_mesh_parent(parent)	
-
-# Überprüfen, ob current_node ein direktes Child von parent_node ist
-func _is_direct_child(parent_node: Node, current_node: Node) -> bool:
-	return current_node.get_parent() == parent_node
-
 
 # Gibt { "vertices": int, "faces": int } zurück
 func get_mesh_stats(mesh_instance: MeshInstance3D) -> Dictionary:

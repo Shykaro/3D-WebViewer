@@ -24,6 +24,10 @@ window/size/viewport_height=720
 
 project/assembly_name="Bleweb"
 
+[gui]
+
+theme/custom_font="res://styles/Poppins-Regular.ttf"
+
 [input]
 
 turntable_left={

@@ -28,10 +28,41 @@ var is_in_explosion_view = false
 var is_imploding = false
 var explosion_elapsed = 0.0
 
-var mesh_original_positions = {}
-var mesh_explosion_targets = {}
+var mesh_original_positions: Dictionary = {}
+var mesh_explosion_targets: Dictionary = {}
+var state_stack: Array = []
+var last_state: Dictionary = {}
+
+var current_level: int = 0
 
 var is_animation_active = false
+
+
+func push_state():
+	var current_state = {}
+	
+	# Tiefkopie von mesh_original_positions erstellen
+	for mesh in mesh_original_positions.keys():
+		current_state[mesh] = mesh_original_positions[mesh]
+	
+	# Die Kopie an die erste Stelle des Arrays einfügen
+	state_stack.insert(current_level, current_state)
+	current_level += 1
+	
+	#print("current state added: ", state_stack)
+	print("[DEBUG] Zustand gespeichert. Stackgröße:", current_level)
+
+func pop_state():
+	if state_stack.size() > 0:
+		current_level -= 1
+		last_state = state_stack[current_level]
+		#print("Last state: ", last_state)
+		#for mesh in last_state.keys():
+			#mesh.global_transform.origin = last_state[mesh]
+		print("[DEBUG] Zustand wiederhergestellt. Stackgröße:", current_level)
+	else:
+		print("[DEBUG] Stack ist leer. Keine Zustände zum Wiederherstellen.")
+		pass
 
 func _ready():
 	# Initialisierungsschritte, wenn nötig
@@ -69,8 +100,8 @@ func _process(delta):
 		explosion_elapsed += delta
 		var t = clamp(explosion_elapsed / explosion_duration, 0, 1)
 
-		for mesh in mesh_original_positions.keys():
-			var original_pos = mesh_original_positions[mesh]
+		for mesh in last_state.keys():
+			var original_pos = last_state[mesh]
 			var target_pos = mesh_explosion_targets[mesh]
 			var new_pos = target_pos.lerp(original_pos, t)
 
@@ -122,8 +153,8 @@ func start_explosion(selected_part: MeshInstance3D):
 	if is_animation_active:
 		return
 	is_animation_active = true
-	mesh_original_positions.clear()
-	mesh_explosion_targets.clear()
+	mesh_original_positions.clear() #WICHTIG
+	#mesh_explosion_targets.clear()	#WICHTIG, näher anschauen
 
 	var current_hierarchy = $"..".model_hierarchy
 	var center_point = calculate_mesh_center(selected_part)
@@ -146,19 +177,21 @@ func start_explosion(selected_part: MeshInstance3D):
 
 			mesh_original_positions[mesh] = mesh.global_transform.origin
 			mesh_explosion_targets[mesh] = target_pos
-
+	push_state()
 	resolve_collisions(mesh_explosion_targets)
 	explosion_elapsed = 0.0
 	is_exploding = true
 
 # Startet die Implosion, um die Objekte zurückzubewegen
 func start_implosion():
+	pop_state()
 	if is_animation_active:
 		return
 	is_animation_active = true
 	explosion_elapsed = 0.0
 	is_imploding = true
 	is_in_explosion_view = false
+	
 
 # Behebt Kollisionen zwischen Mesh-Zielpositionen
 func resolve_collisions(explosion_targets: Dictionary):

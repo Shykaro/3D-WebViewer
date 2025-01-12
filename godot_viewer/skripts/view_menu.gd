@@ -8,6 +8,8 @@ extends Control
 @export var matcap_material: Resource = preload("res://materials/MatCapMaterial.tres")
 @export var active_material: Resource
 
+var original_material_on: bool = true
+
 @onready var model_container: Node3D = $"../../../turntable/VignetteSubViewport/model_container"
 @onready var main: Node3D = $"../../.."
 
@@ -27,10 +29,10 @@ var side_container_OG_position
 var original_materials = {}
 
 func _ready():
-	_save_original_materials()
 	side_container_OG_position = side_container.position.x 
 	side_container.position.x = side_container.position.x + popup_menu.size.x
 	is_expanded = false
+	#_save_original_materials()
 
 
 # -------------------------------------------------------------------------
@@ -38,7 +40,7 @@ func _ready():
 # -------------------------------------------------------------------------
 
 func _on_burger_button_pressed():
-	print("Burger Button Pressed!")
+	#print("Burger Button Pressed!")
 	is_expanded = not is_expanded
 	animate_container(is_expanded)
 
@@ -103,8 +105,9 @@ func _close_popup():
 # -------------------------------------------------------------------------
 
 func _set_model_material(material: Resource):
+	original_material_on = false
 	active_material = material
-	var meshes = _find_all_meshes_in_node(model_container)
+	var meshes = _find_all_meshes_in_hierarchy(main.model_hierarchy)
 	for mesh in meshes:
 		if mesh.mesh:
 			for i in range(mesh.mesh.get_surface_count()):
@@ -112,14 +115,15 @@ func _set_model_material(material: Resource):
 
 # Originalmaterialien wiederherstellen
 func _reset_to_original_material():
-	var meshes = _find_all_meshes_in_node(model_container)
+	original_material_on = true
+	var meshes = _find_all_meshes_in_hierarchy(main.model_hierarchy)
 	for mesh in meshes:
 		reset_material_to_original(mesh)
 
 # Speichert die Originalmaterialien des Modells
 func _save_original_materials():
 	original_materials.clear()
-	var meshes = _find_all_meshes_in_node(model_container)
+	var meshes = _find_all_meshes_in_hierarchy(main.model_hierarchy)
 	for mesh in meshes:
 		if mesh.mesh:
 			var surfaces = []
@@ -129,15 +133,16 @@ func _save_original_materials():
 					material = mesh.mesh.surface_get_material(i)
 				surfaces.append(material)
 			original_materials[mesh] = surfaces
+			#print("original materials: ", original_materials)
 
-# Findet alle MeshInstance3D-Knoten im gegebenen Node
-func _find_all_meshes_in_node(node: Node) -> Array:
+func _find_all_meshes_in_hierarchy(hierarchy: Dictionary) -> Array:
 	var meshes = []
-	for child in node.get_children():
-		if child is MeshInstance3D:
-			meshes.append(child)
-		elif child.get_child_count() > 0:
-			meshes.append_array(_find_all_meshes_in_node(child))
+	for mesh_instance in hierarchy.keys():
+		if mesh_instance is MeshInstance3D:
+			meshes.append(mesh_instance)
+			var child_hierarchy = hierarchy[mesh_instance]
+			if child_hierarchy.size() > 0:
+				meshes += _find_all_meshes_in_hierarchy(child_hierarchy)
 	return meshes
 
 func reset_material_to_original(part: MeshInstance3D):

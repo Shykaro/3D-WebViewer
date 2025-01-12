@@ -71,14 +71,14 @@ func calculate_global_aabb(node: Node) -> AABB:
 			var child_aabb = AABB(global_min, global_max - global_min)
 
 			if initialized:
-				global_aabb = global_aabb.merge(child_aabb)
+				global_aabb = global_aabb.merge(child_aabb.abs())
 			else:
 				global_aabb = child_aabb
 				initialized = true
 
 		var child_aabb = calculate_global_aabb(child)
 		if initialized:
-			global_aabb = global_aabb.merge(child_aabb)
+			global_aabb = global_aabb.merge(child_aabb.abs())
 		else:
 			global_aabb = child_aabb
 			initialized = true
