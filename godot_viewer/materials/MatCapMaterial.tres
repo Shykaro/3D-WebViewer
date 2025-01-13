@@ -1,11 +1,11 @@
 [gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://bfyccufoqaa7g"]
 
 [ext_resource type="Shader" path="res://materials/MatCap.gdshader" id="1_cwwtg"]
-[ext_resource type="Texture2D" uid="uid://beo5i0amirn86" path="res://assets/Clay.exr" id="2_4opg0"]
+[ext_resource type="Texture2D" uid="uid://c76ghowmn8ul0" path="res://assets/Clay.png" id="2_3s4ed"]
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_cwwtg")
 shader_parameter/margin = 0.099
 shader_parameter/is_spatial = false
-shader_parameter/matcap = ExtResource("2_4opg0")
+shader_parameter/matcap = ExtResource("2_3s4ed")

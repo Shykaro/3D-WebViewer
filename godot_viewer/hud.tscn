@@ -299,6 +299,20 @@ toggle_mode = true
 keep_pressed_outside = true
 text = "Disable Explosion View"
 
+[node name="RichTextLabel2" type="RichTextLabel" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Lighting:"
+fit_content = true
+
+[node name="HSlider" type="HSlider" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
+layout_mode = 2
+min_value = -40.0
+max_value = 320.0
+value = -40.0
+rounded = true
+
 [node name="MarginContainer" type="MarginContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer"]
 layout_direction = 2
 layout_mode = 2
@@ -394,3 +408,4 @@ tab_size = 1
 [connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Dark_BG" to="." method="_on_dark_bg_toggled"]
 [connection signal="pressed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/EvActive" to="ViewMenu" method="_on_ev_active_pressed"]
 [connection signal="toggled" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/EvActive" to="ViewMenu" method="_on_ev_active_toggled"]
+[connection signal="value_changed" from="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HSlider" to="." method="_on_h_slider_value_changed"]

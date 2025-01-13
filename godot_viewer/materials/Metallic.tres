@@ -1,10 +1,13 @@
 [gd_resource type="StandardMaterial3D" format=3 uid="uid://c6f26pm52j1wl"]
 
 [resource]
-metallic = 0.9
+metallic = 0.95
 metallic_specular = 1.0
-roughness = 0.1
+roughness = 0.6
 roughness_texture_channel = 4
 emission = Color(1, 1, 1, 1)
 emission_energy_multiplier = 0.05
+clearcoat_roughness = 0.9
+anisotropy_enabled = true
+anisotropy = 0.9
 subsurf_scatter_strength = 0.72

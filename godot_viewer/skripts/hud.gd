@@ -93,3 +93,11 @@ func _on_dark_bg_toggled(toggled_on):
 	else:
 		change_camera_background_color(Color.html("#E6E0D4"))
 	pass # Replace with function body.
+
+
+
+
+
+func _on_h_slider_value_changed(value):
+	$"../../camera_rig/stage_light".rotation_degrees.x = value
+	#pass # Replace with function body.

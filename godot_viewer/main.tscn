@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
-[ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_rpgad"]
+[ext_resource type="PackedScene" uid="uid://b485wc6ufwbt1" path="res://model/alt_models/ModelA.glb" id="4_ptqv1"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_u1gci"]
@@ -33,7 +33,7 @@ size = Vector2i(1280, 720)
 
 [node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
 
-[node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_rpgad")]
+[node name="ModelA" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_ptqv1")]
 
 [node name="camera_rig" type="Node3D" parent="."]
 script = ExtResource("3_p5mvp")
@@ -51,15 +51,15 @@ light_energy = 0.4
 shadow_bias = 2.0
 sky_mode = 1
 
-[node name="camera_arm" type="Node3D" parent="camera_rig"]
-
-[node name="stage_light" type="DirectionalLight3D" parent="camera_rig/camera_arm"]
-transform = Transform3D(0.637639, 0.533681, -0.555519, -0.108971, 0.776377, 0.620777, 0.762589, -0.335296, 0.553204, -11.8923, 10.1712, -5.13634)
+[node name="stage_light" type="DirectionalLight3D" parent="camera_rig"]
+transform = Transform3D(0.701086, 0.515768, -0.492404, -0.106613, 0.758589, 0.642788, 0.705061, -0.398153, 0.586824, -11.8923, 10.1712, -5.13634)
 light_energy = 0.4
 light_indirect_energy = 0.0
 light_volumetric_fog_energy = 0.0
 shadow_bias = 2.0
 sky_mode = 1
+
+[node name="camera_arm" type="Node3D" parent="camera_rig"]
 
 [node name="camera" type="Camera3D" parent="camera_rig/camera_arm"]
 transform = Transform3D(1, 0, 0, 0, 1, -2.98023e-08, 0, 0, 1, 0, 0, 3)
