@@ -4,8 +4,8 @@ extends Node3D
 @export var zoom_speed = 0.5
 
 var camera_distance = 4
-#var min_zoom = 2   # Entfernt: kein Minimum mehr
-var max_zoom = 100  # Optional behalten
+#var min_zoom = 2
+var max_zoom = 100
 
 @onready var model_container = $"../turntable/VignetteSubViewport/model_container"
 @onready var turntable = $"../turntable"
@@ -25,9 +25,9 @@ func _ready():
 	var fov = deg_to_rad($camera_arm/camera.fov)
 	var aspect_ratio = $camera_arm/camera.get_viewport().size.x / $camera_arm/camera.get_viewport().size.y
 
-	camera_distance = calculate_camera_distance(dimensions, fov, aspect_ratio)
+	#camera_distance = calculate_camera_distance(dimensions, fov, aspect_ratio) #Passt Cameradistanz an Modellgröße an, ist allerdings durch besserbefundene Modellskalierung obsolet geworden
 	# min_zoom = camera_distance * 0.8
-	max_zoom = camera_distance * 3.0
+	#max_zoom = camera_distance * 3.0
 
 	_handle_zoom()
 
@@ -45,7 +45,7 @@ func _process(delta):
 	if ud_axis != 0:
 		rot_x = rotation_speed * ud_axis * delta * PI / 180
 
-	# Mausbewegung für Rotation
+	#Mausbewegung für Rotation
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		var mousePos = get_viewport().get_mouse_position()
 		var is_mouse_over_view_menu = $"../CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu".get_global_rect().has_point(mousePos) or $"../CanvasLayer/Hud/ViewMenu/HBoxContainer/ArrowPanel".get_global_rect().has_point(mousePos)
@@ -70,6 +70,7 @@ func calculate_camera_distance(dimensions: Vector3, fov: float, aspect_ratio: fl
 		height = width / aspect_ratio
 	return height / (2.0 * tan(fov / 2.0))
 
+#rekursiver Aufruf um die AABBs zusammenzufügen
 func calculate_global_aabb(node: Node) -> AABB:
 	var global_aabb = AABB()
 	var initialized = false
@@ -105,8 +106,6 @@ func _input(event):
 	_handle_zoom()
 
 func _handle_zoom():
-
-#Negierung von ungewollten Gamestates
 	#camera_distance = clamp(camera_distance, -INF, max_zoom)
 	camera_distance = clamp(camera_distance, 0.01, max_zoom)
 

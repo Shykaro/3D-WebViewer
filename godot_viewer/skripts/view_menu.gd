@@ -47,7 +47,6 @@ func _on_burger_button_pressed():
 	animate_container(is_expanded)
 
 func animate_container(expanded: bool):
-	# Kill any existing tween
 	if tween and tween.is_valid():
 		tween.kill()
 	
@@ -103,7 +102,7 @@ func _on_wire_frame_toggled(toggled_on):
 		_set_model_material(wireframe_material)
 	else:
 		_reset_to_original_material()
-	pass # Replace with function body.
+	pass
 
 
 func _on_normals_toggled(toggled_on):
@@ -111,7 +110,7 @@ func _on_normals_toggled(toggled_on):
 		_set_model_material(normals_material)
 	else:
 		_reset_to_original_material()
-	pass # Replace with function body.
+	pass 
 
 
 func _on_uv_grid_toggled(toggled_on):
@@ -119,7 +118,7 @@ func _on_uv_grid_toggled(toggled_on):
 		_set_model_material(textured_material)
 	else:
 		_reset_to_original_material()
-	pass # Replace with function body.
+	pass
 
 
 func _on_metallic_toggled(toggled_on):
@@ -127,7 +126,7 @@ func _on_metallic_toggled(toggled_on):
 		_set_model_material(metallic_material)
 	else:
 		_reset_to_original_material()
-	pass # Replace with function body.
+	pass
 
 
 func _on_mat_cap_toggled(toggled_on):
@@ -135,12 +134,12 @@ func _on_mat_cap_toggled(toggled_on):
 		_set_model_material(matcap_material)
 	else:
 		_reset_to_original_material()
-	pass # Replace with function body.
+	pass
 
 
 func _on_ev_active_toggled(toggled_on):
 	main.EV_active = not main.EV_active
-	pass # Replace with function body.
+	pass
 
 
 
@@ -198,7 +197,6 @@ func reset_material_to_original(part: MeshInstance3D):
 		var surfaces = original_materials[part]
 		for i in range(len(surfaces)):
 			part.set_surface_override_material(i, surfaces[i])
-			# Transparenz beibehalten, falls aktiv
 			var material = surfaces[i]
 			if material and material is BaseMaterial3D and material.albedo_color.a < 1.0:
 				material.set_transparency(BaseMaterial3D.TRANSPARENCY_ALPHA)
@@ -207,22 +205,22 @@ func reset_material_to_original(part: MeshInstance3D):
 #func _on_arrow_panel_mouse_entered():
 	#mouse_currently_over_menu = true
 	#print("Set mouse entered: ", mouse_currently_over_menu)
-	#pass # Replace with function body.
+	#pass
 #
 #
 #func _on_arrow_panel_mouse_exited():
 	#mouse_currently_over_menu = false
 	#print("Set mouse entered: ", mouse_currently_over_menu)
-	#pass # Replace with function body.
+	#pass
 #
 #
 #func _on_menu_panel_mouse_entered():
 	#mouse_currently_over_menu = true
 	#print("Set mouse entered: ", mouse_currently_over_menu)
-	#pass # Replace with function body.
+	#pass
 #
 #
 #func _on_menu_panel_mouse_exited():
 	#mouse_currently_over_menu = false
 	#print("Set mouse entered: ", mouse_currently_over_menu)
-	#pass # Replace with function body.
+	#pass

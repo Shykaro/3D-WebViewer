@@ -1,11 +1,12 @@
-[gd_scene load_steps=9 format=3 uid="uid://gynpel7qpjrr"]
+[gd_scene load_steps=11 format=3 uid="uid://gynpel7qpjrr"]
 
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
-[ext_resource type="PackedScene" uid="uid://b485wc6ufwbt1" path="res://model/alt_models/ModelA.glb" id="4_ptqv1"]
+[ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_ofigd"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
+[ext_resource type="Script" path="res://skripts/hitbox_camera.gd" id="6_35dpo"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_u1gci"]
 shader = ExtResource("4_o7hb1")
@@ -17,6 +18,9 @@ shader_parameter/vignette_softness = 0.5
 background_color = Color(0, 0.625587, 0.651219, 1)
 ambient_light_source = 1
 reflected_light_source = 1
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_slq3j"]
+size = Vector3(9.84184, 5.79059, 3.03601)
 
 [node name="main" type="Node3D"]
 script = ExtResource("1_it4ho")
@@ -33,7 +37,7 @@ size = Vector2i(1280, 720)
 
 [node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
 
-[node name="ModelA" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_ptqv1")]
+[node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_ofigd")]
 
 [node name="camera_rig" type="Node3D" parent="."]
 script = ExtResource("3_p5mvp")
@@ -72,6 +76,18 @@ light_energy = 0.4
 shadow_bias = 2.0
 sky_mode = 1
 
+[node name="hitbox_camera" type="Node3D" parent="camera_rig/camera_arm/camera"]
+script = ExtResource("6_35dpo")
+
+[node name="Area3D" type="Area3D" parent="camera_rig/camera_arm/camera/hitbox_camera"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="camera_rig/camera_arm/camera/hitbox_camera/Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.112475, -0.310944, -1.48566)
+shape = SubResource("BoxShape3D_slq3j")
+
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Hud" parent="CanvasLayer" instance=ExtResource("4_y7enc")]
+
+[connection signal="body_entered" from="camera_rig/camera_arm/camera/hitbox_camera/Area3D" to="camera_rig/camera_arm/camera/hitbox_camera" method="_on_area_3d_body_entered"]
+[connection signal="body_exited" from="camera_rig/camera_arm/camera/hitbox_camera/Area3D" to="camera_rig/camera_arm/camera/hitbox_camera" method="_on_area_3d_body_exited"]

@@ -53,19 +53,19 @@ func _process(delta):
 
 			var result = get_world_3d().direct_space_state.intersect_ray(ray_query)
 
-			# 1) Finde das Objekt, falls eines gehittet wird
+			#Finde das Objekt, falls eines gehittet wird
 			var new_hovered = null
 			if result and result.collider:
 				if result.collider.get_parent() is MeshInstance3D: #geht leider davon aus dass Godot immer StaticMesh als Child an Meshinstance wirft
 					new_hovered = result.collider.get_parent()
 
-			# 2) Wenn das hovered Objekt sich ändert
+			#Wenn das hovered Objekt sich ändert
 			if new_hovered != hovered_mesh:
-				# Entferne Highlight vom alten
+				#Entferne Highlight vom alten
 				if hovered_mesh:
 					remove_highlight(hovered_mesh)
 
-				# Setze Highlight beim neuen
+				#Setze Highlight beim neuen
 				if new_hovered:
 					apply_highlight(new_hovered)
 
@@ -84,7 +84,6 @@ func _input(event):
 				_select_model_part()
 			last_click_time = current_time
 
-# Generiert Trimesh-Collider für alle relevanten Meshes
 func generate_colliders(node: Node):
 	if node is MeshInstance3D:
 		node.create_trimesh_collision()
@@ -97,12 +96,9 @@ func build_hierarchy(node: Node) -> Dictionary:
 	var hierarchy = {}
 	for child in node.get_children():
 		if child is MeshInstance3D:
-			# Füge das MeshInstance3D zur Hierarchie hinzu
 			hierarchy[child] = build_hierarchy(child)
 		else:
-			# Suche weiter, falls kein MeshInstance3D
 			var sub_hierarchy = build_hierarchy(child)
-			# Füge alle gefundenen MeshInstances direkt in die aktuelle Hierarchie ein
 			for mesh_instance in sub_hierarchy.keys():
 				hierarchy[mesh_instance] = sub_hierarchy[mesh_instance]
 	return hierarchy
@@ -113,27 +109,27 @@ func print_hierarchy(hierarchy: Dictionary, prefix: String = ""):
 			print(prefix, "- MeshInstance3D:", node.name)
 		else:
 			print(prefix, "- Node:", node.name)
-		# Rekursiver Aufruf mit erweitertem Prefix für die Hierarchieebene
+		#Rekursiver Aufruf mit erweitertem Prefix für die Hierarchieebene
 		print_hierarchy(hierarchy[node], prefix + "  ")
 
 func get_stats_for_entire_model():
 	var stats = collect_stats_for_branch(model_hierarchy)
-	# Dann HUD updaten
+	#Dann HUD updaten
 	hud.update_info_count("Vertices: %d   Faces: %d" % [stats["vertices"]/2, stats["faces"]/2])
 	hud.update_info_name("Entire Model")
 
 
 func apply_highlight(mesh: MeshInstance3D):
-	var surfaces = mesh.mesh.get_surface_count()
-	for i in range(surfaces):
-		# Überschreibe Material mit EINEM globalen highlight_material
-		mesh.set_surface_override_material(i, highlight_material)
+	if mesh in $turntable.exploded_meshes:
+		pass
+	else:
+		var surfaces = mesh.mesh.get_surface_count()
+		for i in range(surfaces):
+			#Überschreibe Material mit EINEM globalen highlight_material
+			mesh.set_surface_override_material(i, highlight_material)
 
 func remove_highlight(mesh: MeshInstance3D):
 	var surfaces = mesh.mesh.get_surface_count()
-	
-	# Hole das derzeit ausgewählte globale Material aus dem ViewMenu.
-	# (Achtung: Stelle sicher, dass 'view_menu' ein Skript mit 'active_material' hat!)
 	var current_mat
 	if view_menu.original_material_on:
 		current_mat = null
@@ -142,7 +138,6 @@ func remove_highlight(mesh: MeshInstance3D):
 	#current_mat = null
 	
 	for i in range(surfaces):
-		# Anstelle von 'null' => setze das globale active_material
 		mesh.set_surface_override_material(i, current_mat)
 
 
@@ -153,7 +148,6 @@ func restore_original_material(mesh: MeshInstance3D):
 	for i in range(surfaces):
 		mesh.set_surface_override_material(i, null)
 	original_materials.erase(mesh)
-# In manager.gd
 
 func _select_model_part():
 	var from = camera.project_ray_origin(get_viewport().get_mouse_position())
@@ -176,33 +170,33 @@ func _select_model_part():
 			#print("Clicked Mesh:", clicked_mesh.name)
 
 			if current_part == model:
-				# Wir sind auf der obersten Ebene
+				#Wir sind auf der obersten Ebene
 				var top_parent = find_top_level_key_including(model_hierarchy, clicked_mesh)
 
 				if top_parent != null:
-					#push_state()  # Speichere aktuellen Zustand
+					#push_state()  #Speichere aktuellen Zustand
 					
 					$turntable.start_explosion(top_parent)
 					
-					set_focus_on_level(top_parent)  # "tiefer" gehen in den Ast
+					set_focus_on_level(top_parent)  #tiefer gehen in den Ast
 					#view_menu._set_model_material(view_menu.active_material)
 				else:
 					#print("Kein passender top-level parent gefunden.")
 					pass
 				return
 			else:
-				# Wir sind auf Mesh-Ebene
+				#Wir sind auf Mesh-Ebene
 				#print("Current part for subtree: ", current_part)
 				var subtree = find_subtree(model_hierarchy, current_part)
 				#print("Subtree return: ", subtree)
 
 				if subtree.size() == 0:
-					# Fallback => wir haben keinen subtree => möglicherweise Parent
+					#Fallback -> wir haben keinen subtree -> möglicherweise Parent
 					#print("Hier sollten wir nicht reinkommen")
 					enter_parent_level()
 					return
 
-				# Finde das Dictionary-Parent
+				#Finde das Dictionary-Parent
 				var parent_branch = find_parent_branch(subtree, clicked_mesh)
 				#print
 				if parent_branch != null:
@@ -213,7 +207,6 @@ func _select_model_part():
 					set_focus_on_level(parent_branch)
 					#view_menu._set_model_material(view_menu.active_material)
 				else:
-					# Eventuell: "enter_sub_level()" oder "enter_parent_level()"
 					#print("Kein Parentbranch gefunden, fallback.")
 					enter_parent_level()
 					#$turntable.start_explosion(clicked_mesh)
@@ -221,7 +214,7 @@ func _select_model_part():
 				return
 		selected_mesh = selected_mesh.get_parent()
 
-	# Falls wir gar keinen Mesh gefunden haben:
+	#Falls wir gar keinen Mesh gefunden haben:
 	if current_part != null:
 		#print("Ich sollte nicht passieren")
 		enter_parent_level()
@@ -229,14 +222,14 @@ func _select_model_part():
 func find_top_level_key_including(hierarchy: Dictionary, mesh: MeshInstance3D) -> MeshInstance3D:
 	for top_mesh in hierarchy.keys():
 		if top_mesh == mesh:
-			# Mesh ist selber Top-Level
+			#Mesh ist selber Top-Level
 			return top_mesh
 		else:
 			if find_in_subtree(hierarchy[top_mesh], mesh):
 				return top_mesh
 	return null
 
-# Funktion zur rekursiven Suche nach dem Subtree für einen gegebenen Node
+#Funktion zur rekursiven Suche nach dem Subtree für einen gegebenen Node
 func find_subtree(hierarchy: Dictionary, target_node: MeshInstance3D) -> Dictionary:
 	for key in hierarchy.keys():
 		if key == target_node:
@@ -248,7 +241,7 @@ func find_subtree(hierarchy: Dictionary, target_node: MeshInstance3D) -> Diction
 	return {}  # Subtree nicht gefunden
 
 
-# Hilfsfunktion: Prüft, ob 'mesh' im Dictionary 'subtree' enthalten ist.
+#Hilfsfunktion: Prüft, ob 'mesh' im Dictionary 'subtree' enthalten ist.
 func find_in_subtree(subtree: Dictionary, mesh: MeshInstance3D) -> bool:
 	for child in subtree.keys():
 		if child == mesh:
@@ -287,12 +280,10 @@ func set_focus_on_level(node: Node):
 			if child is MeshInstance3D:
 				current_level.append(child)
 
-	#update_transparency_for_current_view(node)
+	#update_transparency_for_current_view(node) #wegen inkompatibilität mit den Materialeinstellungen erstmal ausgeschalten
 	$turntable.set_focus_on_object(node)
 
-	# --> NUN STATS UPDATEN
 	if node == model:
-		# Dann haben wir "gesamtes Modell" (Root)
 		get_stats_for_entire_model()
 	elif node is MeshInstance3D:
 		var subtree: Dictionary = model_hierarchy.get(node, {})
@@ -304,8 +295,7 @@ func set_focus_on_level(node: Node):
 		hud.update_info_count("Vertices: %d   Faces: %d" % [total_vertices/2, total_faces/2])
 		hud.update_info_name(node.name)
 
-
-# Aktualisiert die Transparenz basierend auf der aktuellen Ebene
+#Aktualisiert die Transparenz basierend auf der aktuellen Ebene, gerade nicht verwendet...
 func update_transparency_for_current_view(except_node: Node = null):
 	for child in parent_node.get_children():
 		if child is MeshInstance3D:
@@ -314,7 +304,7 @@ func update_transparency_for_current_view(except_node: Node = null):
 			else:
 				make_part_transparent(child)
 
-# Wendet Transparenz auf ein Modell an
+#Wendet Transparenz auf ein Modell an, sofern eben eine Alpha vorhanden ist...
 func make_part_transparent(part: MeshInstance3D):
 	if part.mesh:
 		for i in range(part.mesh.get_surface_count()):
@@ -332,29 +322,27 @@ func enter_parent_level():
 		return
 
 	if $turntable.state_stack.size() > 0:
-		#pop_state()  # Stelle letzten Zustand wieder her
+		#pop_state()
 		var mesh_parent = search_for_mesh_parent(current_part)
 		if mesh_parent:
 			print("[DEBUG] Moving to parent level:", mesh_parent.name)
-			set_focus_on_level(mesh_parent)  # Fokus setzen
-			$turntable.start_implosion()  # Implosion starten
+			set_focus_on_level(mesh_parent)  #Fokus setzen
+			$turntable.start_implosion()  #Implosion starten
 	else:
-		#print("[DEBUG] Kein Zustand zum Wiederherstellen gefunden.")
+		#print("[DEBUG] Kein Zustand zum Wiederherstellen gefunden")
 		pass
 
-# Rekursive Suche nach dem nächsten MeshInstance3D-Parent
+#Rekursive Suche nach dem nächsten MeshInstance3D-Parent
 func search_for_mesh_parent(node: Node) -> Node:
 	var parent = node.get_parent()
-	# Stoppe, wenn wir das Modell selbst erreicht haben oder keinen Parent mehr haben
 	if parent == null or parent == model:
 		return model
-	# Wenn der Parent ein MeshInstance3D ist, gib ihn zurück
+	#Wenn der Parent ein MeshInstance3D ist, gib ihn zurück
 	if parent is MeshInstance3D:
 		return parent
-	# Andernfalls, suche weiter rekursiv nach oben
 	return search_for_mesh_parent(parent)	
 
-# Gibt { "vertices": int, "faces": int } zurück
+#Gibt { "vertices": int, "faces": int } zurück
 func get_mesh_stats(mesh_instance: MeshInstance3D) -> Dictionary:
 	var total_vertices = 0
 	var total_faces = 0
@@ -366,34 +354,30 @@ func get_mesh_stats(mesh_instance: MeshInstance3D) -> Dictionary:
 	for s in range(surface_count):
 		var arrays = mesh_instance.mesh.surface_get_arrays(s)
 		if arrays.size() > Mesh.ARRAY_VERTEX:
-			# Vertex-Array
+			#Vertex-Array
 			var vertex_array = arrays[Mesh.ARRAY_VERTEX]
 			total_vertices += vertex_array.size()
 
-			# Index-Array
+			#Index-Array
 			var index_array = arrays[Mesh.ARRAY_INDEX]
 			if index_array and index_array.size() > 0:
 				total_faces += int(index_array.size() / 3)
 			else:
-				# Falls kein Index: kannst du Face-Anzahl schätzen (vertex_array.size()/3),
-				# aber nur wenn du sicher weißt, es sind Dreiecke.
 				pass
 
 	return {"vertices": total_vertices, "faces": total_faces}
 
 
-# Summiert rekursiv die Stats für alle Meshes im Dictionary-Ast
+#Summiert rekursiv die Stats für alle Meshes im Dictionary-Ast
 func collect_stats_for_branch(hierarchy: Dictionary) -> Dictionary:
 	var total_vertices = 0
 	var total_faces = 0
 
 	for mesh in hierarchy.keys():
-		# Stats des Meshes addieren
 		var mesh_stats = get_mesh_stats(mesh)
 		total_vertices += mesh_stats["vertices"]
 		total_faces += mesh_stats["faces"]
 
-		# Rekursiv die Kinder addieren
 		var child_stats = collect_stats_for_branch(hierarchy[mesh])
 		total_vertices += child_stats["vertices"]
 		total_faces += child_stats["faces"]

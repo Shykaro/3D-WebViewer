@@ -3,7 +3,7 @@ extends Node3D
 @export var Scale = 2
 @export var Zoom_Multiplier = 0.35
 @export var transition_duration = 1.0
-@export var explosion_distance = 10.0
+@export var explosion_distance = 3.0
 @export var explosion_duration = 1.0
 
 var start_position = Vector3()
@@ -30,6 +30,7 @@ var explosion_elapsed = 0.0
 
 var mesh_original_positions: Dictionary = {}
 var mesh_explosion_targets: Dictionary = {}
+var exploded_meshes: Dictionary = {}
 var state_stack: Array = []
 var last_state: Dictionary = {}
 
@@ -40,12 +41,8 @@ var is_animation_active = false
 
 func push_state():
 	var current_state = {}
-	
-	# Tiefkopie von mesh_original_positions erstellen
 	for mesh in mesh_original_positions.keys():
 		current_state[mesh] = mesh_original_positions[mesh]
-	
-	# Die Kopie an die erste Stelle des Arrays einfügen
 	state_stack.insert(current_level, current_state)
 	current_level += 1
 	
@@ -65,7 +62,7 @@ func pop_state():
 		pass
 
 func _ready():
-	# Initialisierungsschritte, wenn nötig
+	scale_model_to_fit(model_container.get_child(0))
 	pass
 
 func _process(delta):
@@ -128,6 +125,17 @@ func calculate_whole_model_center(hierarchy: Dictionary):
 		current_pivot = Vector3.ZERO
 		model_container.position = Vector3.ZERO
 
+func scale_model_to_fit(model_node: Node):
+	var aabb = $"../camera_rig".calculate_global_aabb(model_node)
+	if aabb.has_volume():
+		var max_size = aabb.size[aabb.get_longest_axis_index()]
+		var scale_factor = 2.0 / max_size
+		print("Scaled by: ", scale_factor)
+		model_container.scale = Vector3(scale_factor, scale_factor, scale_factor)
+	else:
+		print("Das Modell hat kein Volumen")
+
+
 func collect_weighted_mesh_centers(hierarchy: Dictionary) -> float:
 	var total_volume = 0.0
 	for node in hierarchy:
@@ -149,6 +157,8 @@ func calculate_mesh_center(mesh_instance: MeshInstance3D) -> Vector3:
 		var aabb = mesh_instance.mesh.get_aabb()
 		return gtf.origin + (gtf.basis * aabb.get_center())
 	return Vector3.ZERO
+
+
 func start_explosion(selected_part: MeshInstance3D):
 	if is_animation_active:
 		return
@@ -177,6 +187,9 @@ func start_explosion(selected_part: MeshInstance3D):
 
 			mesh_original_positions[mesh] = mesh.global_transform.origin
 			mesh_explosion_targets[mesh] = target_pos
+			exploded_meshes[mesh] = true
+			#print("Mesh in explosiontargets: ", mesh_explosion_targets)
+			
 	push_state()
 	resolve_collisions(mesh_explosion_targets)
 	explosion_elapsed = 0.0
@@ -185,6 +198,7 @@ func start_explosion(selected_part: MeshInstance3D):
 # Startet die Implosion, um die Objekte zurückzubewegen
 func start_implosion():
 	pop_state()
+	exploded_meshes.clear()
 	if is_animation_active:
 		return
 	is_animation_active = true
@@ -225,22 +239,22 @@ func find_parent_branch(hierarchy: Dictionary, selected_part: MeshInstance3D) ->
 				return result
 	return Dictionary()
 
-# Skaliert das Modell basierend auf seinem AABB
-func setup_scaling_based_on_aabb(model_node: Node):
-	var aabb = calc_aabb_simple(model_node)
-	if aabb.has_volume():
-		var max_size = aabb.size[aabb.get_longest_axis_index()]
-		Scale = 2 / max_size
-		Zoom_Multiplier = 0.35 * Scale
-		model_container.scale = Vector3(Scale, Scale, Scale)
-
-func calc_aabb_simple(n: Node) -> AABB:
-	var aabb_ret = AABB()
-	if n is MeshInstance3D and n.mesh:
-		aabb_ret = n.mesh.get_aabb()
-	for child in n.get_children():
-		aabb_ret = aabb_ret.merge(calc_aabb_simple(child))
-	return aabb_ret
+## Skaliert das Modell basierend auf seinem AABB
+#func setup_scaling_based_on_aabb(model_node: Node):
+	#var aabb = calc_aabb_simple(model_node)
+	#if aabb.has_volume():
+		#var max_size = aabb.size[aabb.get_longest_axis_index()]
+		#Scale = 2 / max_size
+		#Zoom_Multiplier = 0.35 * Scale
+		#model_container.scale = Vector3(Scale, Scale, Scale)
+#
+#func calc_aabb_simple(n: Node) -> AABB:
+	#var aabb_ret = AABB()
+	#if n is MeshInstance3D and n.mesh:
+		#aabb_ret = n.mesh.get_aabb()
+	#for child in n.get_children():
+		#aabb_ret = aabb_ret.merge(calc_aabb_simple(child))
+	#return aabb_ret
 
 # Setzt den Fokus auf ein Zielobjekt
 func set_focus_on_object(target_node: Node3D):
