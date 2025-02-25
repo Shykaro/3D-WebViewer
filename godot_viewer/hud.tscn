@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cnx4n6unxh68o"]
+[gd_scene load_steps=29 format=3 uid="uid://cnx4n6unxh68o"]
 
 [ext_resource type="Script" path="res://skripts/hud.gd" id="1_yyrs7"]
 [ext_resource type="Script" path="res://skripts/view_menu.gd" id="2_dqytv"]
@@ -9,6 +9,7 @@
 [ext_resource type="ButtonGroup" uid="uid://dhbsdj8g8xo1" path="res://styles/Background_Colors.tres" id="6_d2ab7"]
 [ext_resource type="ButtonGroup" uid="uid://c5jsawf8vaop3" path="res://styles/Material_Options.tres" id="6_klr8a"]
 [ext_resource type="StyleBox" uid="uid://1wnsx0olxm3k" path="res://styles/Info_Box.tres" id="6_qsail"]
+[ext_resource type="Theme" uid="uid://b0md73jcl24qf" path="res://buttons.tres" id="7_ps3u7"]
 
 [sub_resource type="Shader" id="Shader_ax1fl"]
 code = "// NOTE: Shader automatically converted from Godot Engine 4.3.stable's CanvasItemMaterial.
@@ -19,6 +20,20 @@ render_mode blend_mix;
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nvulw"]
 shader = SubResource("Shader_ax1fl")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jljh7"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qg82y"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eqsvy"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ukcb0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7dkh3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ugpwk"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gqp4p"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vhnya"]
 bg_color = Color(0.901961, 0.878431, 0.831373, 1)
@@ -31,6 +46,8 @@ border_color = Color(0.0901961, 0.0980392, 0.109804, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ubkr2"]
 bg_color = Color(0.901961, 0.878431, 0.831373, 1)
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8l74j"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b202y"]
 bg_color = Color(0.498039, 0.498039, 0.498039, 1)
 border_width_left = 2
@@ -41,6 +58,8 @@ border_width_bottom = 2
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ik2dt"]
 bg_color = Color(0.498039, 0.498039, 0.498039, 1)
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2xs6y"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ljow8"]
 bg_color = Color(0.0901961, 0.0980392, 0.109804, 1)
 border_width_left = 2
@@ -50,6 +69,8 @@ border_width_bottom = 2
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vanf1"]
 bg_color = Color(0.0901961, 0.0980392, 0.109804, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h4fhu"]
 
 [node name="Hud" type="Control"]
 layout_mode = 3
@@ -157,7 +178,7 @@ theme_override_constants/margin_bottom = 5
 layout_mode = 2
 size_flags_vertical = 6
 theme_override_constants/h_separation = 3
-theme_override_constants/v_separation = 20
+theme_override_constants/v_separation = 10
 
 [node name="RichTextLabel" type="RichTextLabel" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
@@ -166,10 +187,12 @@ fit_content = true
 
 [node name="WireFrame" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 visible = false
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 6
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_jljh7")
 disabled = true
 toggle_mode = true
 keep_pressed_outside = true
@@ -178,9 +201,11 @@ text = "show Wireframe"
 
 [node name="Normals" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
 visible = false
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_vertical = 6
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_qg82y")
 disabled = true
 toggle_mode = true
 keep_pressed_outside = true
@@ -188,10 +213,13 @@ button_group = ExtResource("6_klr8a")
 text = "show Normals"
 
 [node name="UvGrid" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 6
 mouse_default_cursor_shape = 2
+theme = ExtResource("7_ps3u7")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_eqsvy")
 toggle_mode = true
 keep_pressed_outside = true
 button_group = ExtResource("6_klr8a")
@@ -199,30 +227,36 @@ text = "show UVs
 "
 
 [node name="Metallic" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 6
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ukcb0")
 toggle_mode = true
 keep_pressed_outside = true
 button_group = ExtResource("6_klr8a")
 text = "show Metallic"
 
 [node name="MatCap" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 6
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_7dkh3")
 toggle_mode = true
 keep_pressed_outside = true
 button_group = ExtResource("6_klr8a")
 text = "show MatCap"
 
 [node name="Shaded" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/GridContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 6
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ugpwk")
 toggle_mode = true
 button_pressed = true
 keep_pressed_outside = true
@@ -231,7 +265,6 @@ text = "show Standard"
 
 [node name="MarginContainer2" type="MarginContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 0
 size_flags_vertical = 6
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
@@ -243,6 +276,7 @@ layout_mode = 2
 
 [node name="GridContainer" type="GridContainer" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 6
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
 
@@ -262,6 +296,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_gqp4p")
 theme_override_styles/hover = SubResource("StyleBoxFlat_vhnya")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_vhnya")
 theme_override_styles/normal = SubResource("StyleBoxFlat_ubkr2")
@@ -274,6 +309,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_8l74j")
 theme_override_styles/hover = SubResource("StyleBoxFlat_b202y")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_b202y")
 theme_override_styles/normal = SubResource("StyleBoxFlat_ik2dt")
@@ -285,6 +321,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_2xs6y")
 theme_override_styles/hover = SubResource("StyleBoxFlat_ljow8")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_ljow8")
 theme_override_styles/normal = SubResource("StyleBoxFlat_vanf1")
@@ -292,12 +329,16 @@ toggle_mode = true
 button_group = ExtResource("6_d2ab7")
 
 [node name="EvActive" type="Button" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 6
 mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_h4fhu")
 toggle_mode = true
+button_pressed = true
 keep_pressed_outside = true
-text = "Disable Explosion View"
+text = "Explosion View"
 
 [node name="RichTextLabel2" type="RichTextLabel" parent="ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer"]
 layout_mode = 2

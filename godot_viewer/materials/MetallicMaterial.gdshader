@@ -1,12 +1,5 @@
 shader_type spatial;
-render_mode unshaded;
-
-
-
-varying vec3 worldPos;
-varying vec3 worldNormal;
-varying vec3 worldEye;
-
+render_mode unshaded, cull_disabled; // Unshaded entfernen für Lighting, ist nicht gut ausgegangen also bleibt das erstmal
 
 group_uniforms color;
 	uniform vec3 baseColor: source_color = vec3(1.0, 1.0, 1.0);
@@ -24,8 +17,9 @@ group_uniforms refraction;
 	uniform float refractionAffect = 0.8;
 group_uniforms;
 
-
-
+varying vec3 worldPos;
+varying vec3 worldNormal;
+varying vec3 worldEye;
 
 void vertex() {
 	
@@ -36,24 +30,18 @@ void vertex() {
 }
 
 void fragment() {
-	
-	// Ensure the normal has a length of 1.
+
 	vec3 fixedWorldNormal = normalize(worldNormal);
 	
-	// Get the direction we are looking towards.
 	vec3 lookDir = normalize(worldPos - worldEye);
 	
-	// Get the dot product between the look direction and the normal.
-	// This returns essentially how 'straight on' we are looking.
 	float lookDot = pow(
 		abs(dot(lookDir, fixedWorldNormal)),
 		refractionSplitPower
 	);
 	
-	// Get the reflection direction.
 	vec3 reflectionDir = reflect(lookDir, fixedWorldNormal);
 	
-	// Assemble the gradient.
 	vec3 gradientDirection = gradientBasis * reflectionDir;
 	
 	if (gradientBasisDistort != vec3(0.0)) {
@@ -67,7 +55,6 @@ void fragment() {
 		+ gradientBasisSpeed * TIME
 	);
 	
-	// The final sine wave.
 	vec3 refraction = 0.5 + 0.5 * sin(
 		  vec3(-1.0, 0.0, 1.0)
 		* (1.0 - lookDot)
@@ -75,7 +62,6 @@ void fragment() {
 		+ gradient
 	);
 	
-	// Construct the final color.
 	vec3 color = baseColor * (1.0 - refraction * refractionAffect);
 	
 	ALBEDO = color;

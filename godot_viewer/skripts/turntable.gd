@@ -3,7 +3,7 @@ extends Node3D
 @export var Scale = 2
 @export var Zoom_Multiplier = 0.35
 @export var transition_duration = 1.0
-@export var explosion_distance = 3.0
+@export var explosion_distance = 2.0
 @export var explosion_duration = 1.0
 
 var start_position = Vector3()

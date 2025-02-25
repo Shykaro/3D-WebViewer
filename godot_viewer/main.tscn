@@ -3,8 +3,8 @@
 [ext_resource type="Script" path="res://skripts/turntable.gd" id="1_0wb5i"]
 [ext_resource type="Script" path="res://skripts/manager.gd" id="1_it4ho"]
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
+[ext_resource type="PackedScene" uid="uid://hkpvqwjd13a8" path="res://model/alt_models/modelKr.glb" id="4_kkvye"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
-[ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_ofigd"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
 [ext_resource type="Script" path="res://skripts/hitbox_camera.gd" id="6_35dpo"]
 
@@ -37,7 +37,7 @@ size = Vector2i(1280, 720)
 
 [node name="model_container" type="Node3D" parent="turntable/VignetteSubViewport"]
 
-[node name="model" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_ofigd")]
+[node name="modelKr" parent="turntable/VignetteSubViewport/model_container" instance=ExtResource("4_kkvye")]
 
 [node name="camera_rig" type="Node3D" parent="."]
 script = ExtResource("3_p5mvp")
@@ -77,12 +77,17 @@ shadow_bias = 2.0
 sky_mode = 1
 
 [node name="hitbox_camera" type="Node3D" parent="camera_rig/camera_arm/camera"]
+visible = false
 script = ExtResource("6_35dpo")
 
 [node name="Area3D" type="Area3D" parent="camera_rig/camera_arm/camera/hitbox_camera"]
+visible = false
+monitoring = false
+monitorable = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="camera_rig/camera_arm/camera/hitbox_camera/Area3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.112475, -0.310944, -1.48566)
+visible = false
 shape = SubResource("BoxShape3D_slq3j")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]

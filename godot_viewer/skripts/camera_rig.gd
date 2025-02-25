@@ -91,12 +91,12 @@ func calculate_global_aabb(node: Node) -> AABB:
 
 		var child_aabb = calculate_global_aabb(child)
 		if initialized:
-			global_aabb = global_aabb.merge(child_aabb.abs())
+			global_aabb = global_aabb.abs().merge(child_aabb.abs())
 		else:
 			global_aabb = child_aabb
 			initialized = true
 
-	return global_aabb
+	return global_aabb.abs()
 
 func _input(event):
 	if event.is_action_pressed("zoom_in"):
