@@ -1,11 +1,11 @@
 extends Control
 
 @onready var camera: Camera3D = $"../../camera_rig/camera_arm/camera"
+@onready var camera_light = $"../../camera_rig/stage_light"
 
 @onready var light_btn = $ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Light_BG
 @onready var grey_btn = $ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Half_BG
 @onready var dark_btn = $ViewMenu/HBoxContainer/PopupMenu/VBoxContainer/MarginContainer2/VBoxContainer/GridContainer/HBoxContainer/Dark_BG
-
 
 var counter: int = 0
 
@@ -24,78 +24,30 @@ func update_info_count(count: String):
 func change_camera_background_color(color: Color):
 	if camera.environment == null:
 		camera.environment = Environment.new()
-		#print("Created new environment")
 	camera.environment.background_mode = Environment.BG_COLOR
-	camera.environment.background_color = color  #Setze die Hintergrundfarbe
-	#print("Color: ", color)
+	camera.environment.background_color = color  #Hintergrundfarbe
 	return
-
-#func _on_backgroundcolor_pressed() -> void:
-	#match counter:
-		#0:
-			#change_camera_background_color(Color.html("#17191C"))  # Dunkelgrau
-			#counter += 1
-		#1:
-			#change_camera_background_color(Color.html("#7f7f7f"))  # 50%grau
-			#counter += 1
-		#2:
-			#change_camera_background_color(Color.html("#E6E0D4"))  # Hellgrau
-			#counter = 0
-
-
-#func _on_light_bg_pressed():
-	#change_camera_background_color(Color.html("#E6E0D4"))
-	#pass
-#
-#
-#func _on_half_bg_pressed():
-	#change_camera_background_color(Color.html("#7f7f7f"))
-	#pass
-#
-#
-#func _on_dark_bg_pressed():
-	#change_camera_background_color(Color.html("#17191C"))
-	#pass
-#
 
 func _on_light_bg_toggled(toggled_on):
 	if toggled_on:
 		change_camera_background_color(Color.html("#E6E0D4"))
-		#grey_btn.button_pressed = false
-		#dark_btn.button_pressed = false
-		#grey_btn.toggled
-		#dark_btn.toggled
 	else:
 		change_camera_background_color(Color.html("#E6E0D4"))
 	pass
-
 
 func _on_half_bg_toggled(toggled_on):
 	if toggled_on:
 		change_camera_background_color(Color.html("#7f7f7f"))
-		#light_btn.button_pressed = false
-		#dark_btn.button_pressed = false
-		#light_btn.toggled
-		#dark_btn.toggled
 	else:
 		change_camera_background_color(Color.html("#E6E0D4"))
 	pass
-
 
 func _on_dark_bg_toggled(toggled_on):
 	if toggled_on:
 		change_camera_background_color(Color.html("#17191C"))
-		#light_btn.button_pressed = false
-		#grey_btn.button_pressed = false
-		#light_btn.toggled
-		#grey_btn.toggled
 	else:
 		change_camera_background_color(Color.html("#E6E0D4"))
 	pass
 
-
-
-
-
 func _on_h_slider_value_changed(value):
-	$"../../camera_rig/stage_light".rotation_degrees.x = value
+	camera_light.rotation_degrees.x = value

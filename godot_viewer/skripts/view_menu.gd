@@ -36,7 +36,6 @@ func _ready():
 	is_expanded = false
 	#_save_original_materials()
 
-
 # -------------------------------------------------------------------------
 # AUSKLAPP- / EINKLAPP-LOGIK
 # -------------------------------------------------------------------------
@@ -49,18 +48,14 @@ func _on_burger_button_pressed():
 func animate_container(expanded: bool):
 	if tween and tween.is_valid():
 		tween.kill()
-	
 	var menu_width = popup_menu.size.x 
 	# EndX=0 wenn expanded, sonst -menu_width
 	var end_x = side_container_OG_position if expanded else (side_container.position.x + popup_menu.size.x)
 	var final_scale_x = -1 if expanded else 1
-
 	tween = get_tree().create_tween()
 	tween.tween_property(side_container, "position:x", end_x, animation_time) \
 		.set_trans(Tween.TRANS_EXPO) \
 		.set_ease(Tween.EASE_OUT)
-
-
 	tween.parallel().tween_property($HBoxContainer/ArrowPanel/MarginContainer, "scale:x", final_scale_x, animation_time)
 
 # -------------------------------------------------------------------------
@@ -70,32 +65,9 @@ func animate_container(expanded: bool):
 func _update_menu_visibility():
 	popup_menu.visible = menu_open
 
-#func _on_wire_frame_pressed():
-	#_set_model_material(wireframe_material)
-	##_close_popup()
-#
-#func _on_uv_grid_pressed():
-	#_set_model_material(textured_material)
-	##_close_popup()
-#
-#func _on_normals_pressed():
-	#_set_model_material(normals_material)
-	##_close_popup()
-#
-#func _on_metallic_pressed():
-	#_set_model_material(metallic_material)
-	##_close_popup()
-#
-#func _on_mat_cap_pressed():
-	#_set_model_material(matcap_material)
-	##_close_popup()
-#
 func _on_shaded_pressed():
 	_reset_to_original_material()
 	#_close_popup()
-#
-#func _on_ev_active_pressed():
-	#main.EV_active = not main.EV_active
 
 func _on_wire_frame_toggled(toggled_on):
 	if toggled_on:
@@ -104,14 +76,12 @@ func _on_wire_frame_toggled(toggled_on):
 		_reset_to_original_material()
 	pass
 
-
 func _on_normals_toggled(toggled_on):
 	if toggled_on:
 		_set_model_material(normals_material)
 	else:
 		_reset_to_original_material()
 	pass 
-
 
 func _on_uv_grid_toggled(toggled_on):
 	if toggled_on:
@@ -120,14 +90,12 @@ func _on_uv_grid_toggled(toggled_on):
 		_reset_to_original_material()
 	pass
 
-
 func _on_metallic_toggled(toggled_on):
 	if toggled_on:
 		_set_model_material(metallic_material)
 	else:
 		_reset_to_original_material()
 	pass
-
 
 func _on_mat_cap_toggled(toggled_on):
 	if toggled_on:
@@ -136,12 +104,9 @@ func _on_mat_cap_toggled(toggled_on):
 		_reset_to_original_material()
 	pass
 
-
 func _on_ev_active_toggled(toggled_on):
 	main.EV_active = not main.EV_active
 	pass
-
-
 
 func _close_popup():
 	menu_open = false
@@ -160,14 +125,14 @@ func _set_model_material(material: Resource):
 			for i in range(mesh.mesh.get_surface_count()):
 				mesh.set_surface_override_material(i, material)
 
-# Originalmaterialien wiederherstellen
+#Originalmaterialien wiederherstellen
 func _reset_to_original_material():
 	original_material_on = true
 	var meshes = _find_all_meshes_in_hierarchy(main.model_hierarchy)
 	for mesh in meshes:
 		reset_material_to_original(mesh)
 
-# Speichert die Originalmaterialien des Modells
+#Speichert die Originalmaterialien des Modells
 func _save_original_materials():
 	original_materials.clear()
 	var meshes = _find_all_meshes_in_hierarchy(main.model_hierarchy)
