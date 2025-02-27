@@ -9,7 +9,7 @@
 [ext_resource type="ButtonGroup" uid="uid://dhbsdj8g8xo1" path="res://styles/Background_Colors.tres" id="6_d2ab7"]
 [ext_resource type="ButtonGroup" uid="uid://c5jsawf8vaop3" path="res://styles/Material_Options.tres" id="6_klr8a"]
 [ext_resource type="StyleBox" uid="uid://1wnsx0olxm3k" path="res://styles/Info_Box.tres" id="6_qsail"]
-[ext_resource type="Theme" uid="uid://b0md73jcl24qf" path="res://buttons.tres" id="7_ps3u7"]
+[ext_resource type="Theme" uid="uid://b0md73jcl24qf" path="res://styles/buttons.tres" id="7_ps3u7"]
 
 [sub_resource type="Shader" id="Shader_ax1fl"]
 code = "// NOTE: Shader automatically converted from Godot Engine 4.3.stable's CanvasItemMaterial.
