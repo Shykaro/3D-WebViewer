@@ -38,11 +38,11 @@ func _process(delta):
 	var ud_axis = Input.get_axis("turntable_down", "turntable_up")
 	if ud_axis != 0:
 		rot_x = rotation_speed * ud_axis * delta * PI / 180
-	#Mausbewegung für Rotation
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and touch_points.size() < 2:
 		var mousePos = get_viewport().get_mouse_position()
 		var is_mouse_over_view_menu = $"../CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu".get_global_rect().has_point(mousePos) or $"../CanvasLayer/Hud/ViewMenu/HBoxContainer/ArrowPanel".get_global_rect().has_point(mousePos)
-		if !is_mouse_over_view_menu:
+		if not is_mouse_over_view_menu:
 			var mouse_vel = Input.get_last_mouse_velocity()
 			rot_y = rotation_speed * (-mouse_vel.x / 400) * delta * PI / 180
 			rot_x = rotation_speed * (-mouse_vel.y / 800) * delta * PI / 180
