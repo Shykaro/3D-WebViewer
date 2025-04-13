@@ -5,7 +5,6 @@
 [ext_resource type="Script" path="res://skripts/camera_rig.gd" id="3_p5mvp"]
 [ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_4sl3o"]
 [ext_resource type="Shader" path="res://shaders/vignette_shader.gdshader" id="4_o7hb1"]
-[ext_resource type="PackedScene" uid="uid://c7046xwmvyna6" path="res://model/model.glb" id="4_vf6qc"]
 [ext_resource type="PackedScene" uid="uid://cnx4n6unxh68o" path="res://hud.tscn" id="4_y7enc"]
 [ext_resource type="Script" path="res://skripts/hitbox_camera.gd" id="6_35dpo"]
 
