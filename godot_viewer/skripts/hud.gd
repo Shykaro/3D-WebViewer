@@ -10,10 +10,15 @@ extends Control
 var counter: int = 0
 
 func _ready():
-	#if not check_button.is_connected("toggled", Callable(self, "_on_check_button_toggled")):
-		#check_button.toggled.connect(_on_check_button_toggled)
-	change_camera_background_color(Color.html("#E6E0D4"))  # Hellgrau
-	pass
+	var screen_size: Vector2 = get_viewport().get_visible_rect().size
+	var diagonal: float = screen_size.length()
+	var multiplier: float = 0.03
+	var square_size: float = diagonal * multiplier
+	$ViewMenu/HBoxContainer/ArrowPanel.custom_minimum_size = Vector2(square_size, square_size)
+	$ViewMenu/HBoxContainer/ArrowPanel/MarginContainer.pivot_offset = Vector2(square_size * 0.5, (square_size * 0.5)+1)
+	#print("Neue Mindestgröße:", $ViewMenu/HBoxContainer/ArrowPanel.custom_minimum_size)
+	#print("Neuer Pivot-Offset:", $ViewMenu/HBoxContainer/ArrowPanel/MarginContainer.pivot_offset)
+	change_camera_background_color(Color.html("#E6E0D4"))
 
 func update_info_name(name: String):
 	get_node("InfoPanel/MarginContainer/HBoxContainer/VBoxContainer/Name").text = str(name)
