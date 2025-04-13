@@ -7,6 +7,10 @@ var camera_distance = 4
 #var min_zoom = 2
 var max_zoom = 100
 
+var touch_points: Dictionary = {}
+var previous_pinch_distance: float = 0.0
+
+
 @onready var model_container = $"../turntable/VignetteSubViewport/model_container"
 @onready var turntable = $"../turntable"
 @onready var view_menu: Control = $"../CanvasLayer/Hud/ViewMenu"
@@ -34,11 +38,11 @@ func _process(delta):
 	var ud_axis = Input.get_axis("turntable_down", "turntable_up")
 	if ud_axis != 0:
 		rot_x = rotation_speed * ud_axis * delta * PI / 180
-	#Mausbewegung für Rotation
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and touch_points.size() < 2:
 		var mousePos = get_viewport().get_mouse_position()
 		var is_mouse_over_view_menu = $"../CanvasLayer/Hud/ViewMenu/HBoxContainer/PopupMenu".get_global_rect().has_point(mousePos) or $"../CanvasLayer/Hud/ViewMenu/HBoxContainer/ArrowPanel".get_global_rect().has_point(mousePos)
-		if !is_mouse_over_view_menu:
+		if not is_mouse_over_view_menu:
 			var mouse_vel = Input.get_last_mouse_velocity()
 			rot_y = rotation_speed * (-mouse_vel.x / 400) * delta * PI / 180
 			rot_x = rotation_speed * (-mouse_vel.y / 800) * delta * PI / 180
@@ -83,9 +87,30 @@ func calculate_global_aabb(node: Node) -> AABB:
 func _input(event):
 	if event.is_action_pressed("zoom_in"):
 		camera_distance -= zoom_speed
+		_handle_zoom()
 	elif event.is_action_pressed("zoom_out"):
 		camera_distance += zoom_speed
-	_handle_zoom()
+		_handle_zoom()
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		if event is InputEventScreenTouch:
+			if event.pressed:
+				touch_points[event.index] = event.position
+			else:
+				touch_points.erase(event.index)
+				if touch_points.size() < 2:
+					previous_pinch_distance = 0.0
+		elif event is InputEventScreenDrag:
+			touch_points[event.index] = event.position
+		if touch_points.size() == 2:
+			var positions = touch_points.values()
+			var current_distance = positions[0].distance_to(positions[1])
+			if previous_pinch_distance != 0.0:
+				var delta_distance = current_distance - previous_pinch_distance
+				camera_distance -= delta_distance * 0.01
+				_handle_zoom()
+			previous_pinch_distance = current_distance
+
+			
 
 func _handle_zoom():
 	#camera_distance = clamp(camera_distance, -INF, max_zoom)
